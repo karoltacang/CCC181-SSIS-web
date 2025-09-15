@@ -1,4 +1,4 @@
-import DataPage from "../components/DataPage";
+import DataPage from "../layout/DataPage";
 
 const studentData = [
   { id: "2021-0107", firstname: "John", lastname: "Doe", course: "CS", year: "1st", gender: "Male" },

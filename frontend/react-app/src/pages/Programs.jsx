@@ -1,4 +1,4 @@
-import DataPage from "../components/DataPage";
+import DataPage from "../layout/DataPage";
 
 const programData = [
   { code: "CS101", name: "Computer Science", college: "CCS" },

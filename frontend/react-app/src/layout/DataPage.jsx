@@ -15,7 +15,7 @@ export default function DataPage({ title, data, columns }) {
     <div className="data-page">
       {/* Header */}
       <div className="header-row">
-        <h2 className="title">{title}</h2>
+        <h1 className="title">{title}</h1>
         <div className="action-buttons">
           <button className="btn btn-outline">Export</button>
           <button className="btn btn-primary">+ Add new {title.toLowerCase().slice(0, -1)}</button>
