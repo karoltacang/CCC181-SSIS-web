@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from app.config import Config
 
 def create_app():
@@ -12,5 +12,9 @@ def create_app():
     app.register_blueprint(colleges_bp, url_prefix='/api/colleges')
     app.register_blueprint(programs_bp, url_prefix='/api/programs')
     app.register_blueprint(students_bp, url_prefix='/api/students')
+    
+    @app.route('/api/health', methods=['GET'])
+    def health():
+        return jsonify({'status': 'healthy', 'message': 'SSIS API is running'}), 200
     
     return app
