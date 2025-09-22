@@ -7,9 +7,9 @@ class Student:
         cur = conn.cursor()
         cur.execute('''
             SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
-                   s.program_code, p.program_name, c.college_name 
-            FROM students s 
-            LEFT JOIN programs p ON s.program_code = p.program_code
+                   s.program_code, p.program_name, c.college_name
+            FROM student s
+            LEFT JOIN program p ON s.program_code = p.program_code
             LEFT JOIN college c ON p.college_code = c.college_code
             ORDER BY s.student_id
         ''')
@@ -25,9 +25,9 @@ class Student:
         cur = conn.cursor()
         cur.execute('''
             SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
-                   s.program_code, p.program_name, c.college_name 
-            FROM students s 
-            LEFT JOIN programs p ON s.program_code = p.program_code
+                   s.program_code, p.program_name, c.college_name
+            FROM student s
+            LEFT JOIN program p ON s.program_code = p.program_code
             LEFT JOIN college c ON p.college_code = c.college_code
             WHERE s.student_id = %s
         ''', (student_id,))
@@ -39,12 +39,53 @@ class Student:
         return result
     
     @staticmethod
+    def get_by_program(program_code):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
+                   s.program_code, p.program_name, c.college_name
+            FROM student s
+            LEFT JOIN program p ON s.program_code = p.program_code
+            LEFT JOIN college c ON p.college_code = c.college_code
+            WHERE s.program_code = %s
+            ORDER BY s.student_id
+        ''', (program_code,))
+        columns = [desc[0] for desc in cur.description]
+        results = [dict(zip(columns, row)) for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return results
+
+    @staticmethod
+    def search(search_term):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        query = '''
+            SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
+                   s.program_code, p.program_name, c.college_name
+            FROM student s
+            LEFT JOIN program p ON s.program_code = p.program_code
+            LEFT JOIN college c ON p.college_code = c.college_code
+            WHERE s.student_id ILIKE %s OR s.first_name ILIKE %s OR s.last_name ILIKE %s
+            ORDER BY s.student_id
+        '''
+        # Add wildcards for a 'contains' search
+        like_term = f'%{search_term}%'
+        cur.execute(query, (like_term, like_term, like_term))
+        columns = [desc[0] for desc in cur.description]
+        results = [dict(zip(columns, row)) for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return results
+
+    @staticmethod
     def create(student_id, first_name, last_name, year_level, gender, program_code):
         conn = get_db_connection()
         cur = conn.cursor()
         try:
             cur.execute(
-                '''INSERT INTO students (student_id, first_name, last_name, year_level, gender, program_code) 
+                '''INSERT INTO student (student_id, first_name, last_name, year_level, gender, program_code)
                    VALUES (%s, %s, %s, %s, %s, %s)''',
                 (student_id, first_name, last_name, year_level, gender, program_code)
             )
@@ -63,8 +104,8 @@ class Student:
         cur = conn.cursor()
         try:
             cur.execute(
-                '''UPDATE students 
-                   SET first_name = %s, last_name = %s, year_level = %s, gender = %s, program_code = %s 
+                '''UPDATE student
+                   SET first_name = %s, last_name = %s, year_level = %s, gender = %s, program_code = %s
                    WHERE student_id = %s''',
                 (first_name, last_name, year_level, gender, program_code, student_id)
             )
@@ -83,7 +124,7 @@ class Student:
         conn = get_db_connection()
         cur = conn.cursor()
         try:
-            cur.execute('DELETE FROM students WHERE student_id = %s', (student_id,))
+            cur.execute('DELETE FROM student WHERE student_id = %s', (student_id,))
             affected = cur.rowcount
             conn.commit()
             return affected > 0
