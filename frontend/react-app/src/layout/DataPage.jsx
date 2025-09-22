@@ -7,7 +7,7 @@ export default function DataPage({ title, data, columns }) {
 
   const filteredData = data.filter((item) =>
     Object.values(item).some((value) =>
-      value.toLowerCase().includes(search.toLowerCase())
+      String(value).toLowerCase().includes(search.toLowerCase())
     )
   );
 
