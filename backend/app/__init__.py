@@ -1,13 +1,25 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
+from flask_cors import CORS
 from app.config import Config
+import os
 
 def create_app():
-    app = Flask(__name__)
+    # Define the static folder for the React production build
+    # The path needs to go up three levels from __file__ to reach the project root.
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    static_folder = os.path.join(project_root, 'frontend', 'react-app', 'dist')
+    
+    # Initialize Flask to serve static files from the React build folder
+    app = Flask(__name__, static_folder=static_folder, static_url_path='')
     app.config.from_object(Config)
     
-    from app.colleges import colleges_bp
-    from app.programs import programs_bp
-    from app.students import students_bp
+    # Enable CORS for API routes only
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Register blueprints
+    from app.routes.colleges import colleges_bp
+    from app.routes.programs import programs_bp
+    from app.routes.students import students_bp
     
     app.register_blueprint(colleges_bp, url_prefix='/api/colleges')
     app.register_blueprint(programs_bp, url_prefix='/api/programs')
@@ -16,5 +28,17 @@ def create_app():
     @app.route('/api/health', methods=['GET'])
     def health():
         return jsonify({'status': 'healthy', 'message': 'SSIS API is running'}), 200
+    
+    # This catch-all route serves the React app's entry point (index.html)
+    # for any route that is not an API call or a static file.
+    @app.route('/', defaults={'path': ''}, methods=['GET'])
+    @app.route('/<path:path>', methods=['GET'])
+    def serve_react(path):    
+        # If it's an API call that doesn't exist, it will be handled correctly as a 404.
+        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+            return send_from_directory(app.static_folder, path)
+        else:
+            # For all other paths, serve the React app's entry point.
+            return send_from_directory(app.static_folder, 'index.html')
     
     return app
