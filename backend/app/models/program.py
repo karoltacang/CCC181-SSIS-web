@@ -6,10 +6,9 @@ class Program:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute('''
-            SELECT p.program_code, p.program_name, p.college_code, c.college_name 
-            FROM programs p 
-            LEFT JOIN college c ON p.college_code = c.college_code
-            ORDER BY p.program_code
+            SELECT program_code, program_name, college_code 
+            FROM program
+            ORDER BY program_code
         ''')
         columns = [desc[0] for desc in cur.description]
         results = [dict(zip(columns, row)) for row in cur.fetchall()]
@@ -22,10 +21,9 @@ class Program:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute('''
-            SELECT p.program_code, p.program_name, p.college_code, c.college_name 
-            FROM programs p 
-            LEFT JOIN college c ON p.college_code = c.college_code
-            WHERE p.program_code = %s
+            SELECT program_code, program_name, college_code 
+            FROM program
+            WHERE program_code = %s
         ''', (program_code,))
         columns = [desc[0] for desc in cur.description]
         row = cur.fetchone()
@@ -35,12 +33,28 @@ class Program:
         return result
     
     @staticmethod
+    def get_by_college(college_code):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT program_code, program_name, college_code 
+            FROM program
+            WHERE college_code = %s
+            ORDER BY program_code
+        ''', (college_code,))
+        columns = [desc[0] for desc in cur.description]
+        results = [dict(zip(columns, row)) for row in cur.fetchall()]
+        cur.close()
+        conn.close()
+        return results
+
+    @staticmethod
     def create(program_code, program_name, college_code):
         conn = get_db_connection()
         cur = conn.cursor()
         try:
             cur.execute(
-                'INSERT INTO programs (program_code, program_name, college_code) VALUES (%s, %s, %s)',
+                'INSERT INTO program (program_code, program_name, college_code) VALUES (%s, %s, %s)',
                 (program_code, program_name, college_code)
             )
             conn.commit()
@@ -58,7 +72,7 @@ class Program:
         cur = conn.cursor()
         try:
             cur.execute(
-                'UPDATE programs SET program_name = %s, college_code = %s WHERE program_code = %s',
+                'UPDATE program SET program_name = %s, college_code = %s WHERE program_code = %s',
                 (program_name, college_code, program_code)
             )
             affected = cur.rowcount
@@ -76,7 +90,7 @@ class Program:
         conn = get_db_connection()
         cur = conn.cursor()
         try:
-            cur.execute('DELETE FROM programs WHERE program_code = %s', (program_code,))
+            cur.execute('DELETE FROM program WHERE program_code = %s', (program_code,))
             affected = cur.rowcount
             conn.commit()
             return affected > 0
