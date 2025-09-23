@@ -78,6 +78,8 @@ export default function DataPage({ title, data, columns, search, onSearchChange,
           <button className="btn" onClick={() => setPage(page + 1)}>
             Next
         </button>
+        <p> Go to </p>
+        <input></input>
         </div>
       </div>
     </div>
