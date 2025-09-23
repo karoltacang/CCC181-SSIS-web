@@ -25,6 +25,23 @@ class College:
       return result
     
     @staticmethod
+    def search(search_term):
+      conn = get_db_connection()
+      cur = conn.cursor()
+      query = '''
+            SELECT college_code, college_name FROM college
+            WHERE college_code ILIKE %s OR college_name ILIKE %s
+            ORDER BY college_code
+        '''
+      like_term = f'%{search_term}%'
+      cur.execute(query, (like_term, like_term))
+      columns = [desc[0] for desc in cur.description]
+      results = [dict(zip(columns, row)) for row in cur.fetchall()]
+      cur.close()
+      conn.close()
+      return results
+
+    @staticmethod
     def create(college_code, college_name):
       conn = get_db_connection()
       cur = conn.cursor()
