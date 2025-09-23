@@ -1,15 +1,8 @@
 import { useState } from "react";
 import "../App.css";
 
-export default function DataPage({ title, data, columns }) {
+export default function DataPage({ title, data, columns, search, onSearchChange, onSearchSubmit }) {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-
-  const filteredData = data.filter((item) =>
-    Object.values(item).some((value) =>
-      String(value).toLowerCase().includes(search.toLowerCase())
-    )
-  );
 
   return (
     <div className="data-page">
@@ -27,8 +20,13 @@ export default function DataPage({ title, data, columns }) {
         <input
           type="text"
           placeholder={`Search ${title.toLowerCase()}`}
-          className="search-bar" value={search} 
-          onChange={(e) => setSearch(e.target.value)}
+          className="search-bar" value={search}
+          onChange={onSearchChange}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              onSearchSubmit();
+            }
+          }}
         />
         <button className="btn btn-outline sort-btn">Sort</button>
       </div>
@@ -44,7 +42,7 @@ export default function DataPage({ title, data, columns }) {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((item, index) => (
+            {data.map((item, index) => (
               <tr key={index}>
                 {columns.map((col) => (
                   <td key={col}>{item[col.toLowerCase().replace(/\s/g, "")]}</td>
