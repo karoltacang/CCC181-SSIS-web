@@ -5,9 +5,13 @@ colleges_bp = Blueprint('colleges', __name__)
 
 @colleges_bp.route('', methods=['GET'])
 def get_colleges():
-  """Get all colleges."""
+  """Get all colleges or search colleges."""
   try:
-    colleges = College.get_all()
+    search_term = request.args.get('search')
+    if search_term:
+      colleges = College.search(search_term)
+    else:
+      colleges = College.get_all()
     return jsonify(colleges), 200
   except Exception as e:
     return jsonify({'error': str(e)}), 500
