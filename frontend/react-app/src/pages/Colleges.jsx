@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import DataPage from "../layout/DataPage";
+import DataPage from "../components/DataPage";
 import { collegesAPI } from "../services/api";
 
 const collegeColumns = ["Code", "Name"];
