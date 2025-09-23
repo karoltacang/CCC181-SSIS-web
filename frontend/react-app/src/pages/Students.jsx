@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import DataPage from "../layout/DataPage";
 import { studentsAPI } from "../services/api";
 
-const studentColumns = ["ID", "First Name", "Last Name", "Course", "Year", "Gender"];
+const studentColumns = ["ID", "First Name", "Last Name", "Program", "Year", "Gender"];
 
 export default function Students() {
   const [studentData, setStudentData] = useState([]);
@@ -31,7 +31,7 @@ export default function Students() {
         id: student.student_id,
         firstname: student.first_name,
         lastname: student.last_name,
-        course: student.program_name,
+        program: student.program_code,
         year: student.year_level,
         gender: student.gender || 'N/A'
       }));
