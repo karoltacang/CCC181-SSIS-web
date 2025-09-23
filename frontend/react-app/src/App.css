@@ -80,6 +80,17 @@ table {
   margin-bottom: 1rem;
 }
 
+.data-table th:last-child,
+.data-table td:last-child{
+  width: 100px;
+  white-space: nowrap;
+  padding: 4px 20px;
+}
+
+.data-table th:last-child{
+  text-align: center;
+}
+
 thead {
   background: #e9effc;
 }
@@ -87,9 +98,12 @@ thead {
 thead th {
   padding: 12px 16px;
   text-align: left;
+  position: sticky;
+  top: 0;
   font-size: 14px;
   font-weight: bold;
   color: #2751A2;
+  z-index: 2;
 }
 
 tbody td {
@@ -99,7 +113,7 @@ tbody td {
 }
 
 tbody tr:hover {
-  background: #eef3ff; 
+  background: #eef3ff;
 }
 
 /* Header row */
@@ -113,9 +127,41 @@ tbody tr:hover {
 
 /* Action buttons */
 
-.action-buttons{
+.actions-cell {
   display: flex;
-  gap: 1rem;
+  gap: 8px;
+}
+
+.edit-btn {
+  background: none;
+  color: #2751A2;
+}
+
+.delete-btn {
+  background: none;
+  color: #2751A2;
+}
+
+/* Remove Scrollbar */
+/* width */
+::-webkit-scrollbar {
+    width: 15px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    border-radius: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: transparent;
 }
 
 /* Search and sort container */
