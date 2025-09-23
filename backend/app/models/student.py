@@ -6,13 +6,10 @@ class Student:
       conn = get_db_connection()
       cur = conn.cursor()
       cur.execute('''
-            SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
-                   s.program_code, p.program_name, c.college_name
-            FROM student s
-            LEFT JOIN program p ON s.program_code = p.program_code
-            LEFT JOIN college c ON p.college_code = c.college_code
-            ORDER BY s.student_id
-        ''')
+        SELECT student_id, first_name, last_name, year_level, gender, program_code
+        FROM student
+        ORDER BY student_id;
+      ''')
       columns = [desc[0] for desc in cur.description]
       results = [dict(zip(columns, row)) for row in cur.fetchall()]
       cur.close()
@@ -24,13 +21,10 @@ class Student:
       conn = get_db_connection()
       cur = conn.cursor()
       cur.execute('''
-            SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
-                   s.program_code, p.program_name, c.college_name
-            FROM student s
-            LEFT JOIN program p ON s.program_code = p.program_code
-            LEFT JOIN college c ON p.college_code = c.college_code
-            WHERE s.student_id = %s
-        ''', (student_id,))
+        SELECT student_id, first_name, last_name, year_level, gender, program_code
+        FROM student
+        WHERE student_id = %s;
+      ''', (student_id,))
       columns = [desc[0] for desc in cur.description]
       row = cur.fetchone()
       result = dict(zip(columns, row)) if row else None
@@ -43,14 +37,11 @@ class Student:
       conn = get_db_connection()
       cur = conn.cursor()
       cur.execute('''
-            SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
-                   s.program_code, p.program_name, c.college_name
-            FROM student s
-            LEFT JOIN program p ON s.program_code = p.program_code
-            LEFT JOIN college c ON p.college_code = c.college_code
-            WHERE s.program_code = %s
-            ORDER BY s.student_id
-        ''', (program_code,))
+        SELECT student_id, first_name, last_name, year_level, gender, program_code
+        FROM student
+        WHERE program_code = %s
+        ORDER BY student_id;
+      ''', (program_code,))
       columns = [desc[0] for desc in cur.description]
       results = [dict(zip(columns, row)) for row in cur.fetchall()]
       cur.close()
@@ -62,22 +53,25 @@ class Student:
       conn = get_db_connection()
       cur = conn.cursor()
       query = '''
-            SELECT s.student_id, s.first_name, s.last_name, s.year_level, s.gender, 
-                   s.program_code, p.program_name, c.college_name
-            FROM student s
-            LEFT JOIN program p ON s.program_code = p.program_code
-            LEFT JOIN college c ON p.college_code = c.college_code
-            WHERE s.student_id ILIKE %s OR s.first_name ILIKE %s OR s.last_name ILIKE %s
-            ORDER BY s.student_id
-        '''
-      # Add wildcards for a 'contains' search
+        SELECT student_id, first_name, last_name, year_level, gender, program_code
+        FROM student
+        WHERE student_id ILIKE %s
+          OR first_name ILIKE %s
+          OR last_name ILIKE %s
+          OR gender ILIKE %s
+          OR program_code ILIKE %s
+          ORDER BY student_id;
+      '''
       like_term = f'%{search_term}%'
-      cur.execute(query, (like_term, like_term, like_term))
-      columns = [desc[0] for desc in cur.description]
-      results = [dict(zip(columns, row)) for row in cur.fetchall()]
-      cur.close()
-      conn.close()
-      return results
+      
+      try:
+        cur.execute(query, (like_term, like_term, like_term))
+        columns = [desc[0] for desc in cur.description]
+        results = [dict(zip(columns, row)) for row in cur.fetchall()]
+        return results
+      finally:
+        cur.close()
+        conn.close()
 
     @staticmethod
     def create(student_id, first_name, last_name, year_level, gender, program_code):
