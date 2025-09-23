@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../App.css";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 export default function DataPage({ title, data, columns, search, onSearchChange, onSearchSubmit }) {
   const [page, setPage] = useState(1);
@@ -39,6 +40,8 @@ export default function DataPage({ title, data, columns, search, onSearchChange,
               {columns.map((col) => (
                 <th key={col}>{col}</th>
               ))}
+              {/* For the actions */}
+              <th> Actions </th>
             </tr>
           </thead>
           <tbody>
@@ -47,6 +50,24 @@ export default function DataPage({ title, data, columns, search, onSearchChange,
                 {columns.map((col) => (
                   <td key={col}>{item[col.toLowerCase().replace(/\s/g, "")]}</td>
                 ))}
+                {/* Action buttons */}
+                <div className="action-btn">
+                  <td className="actions-cell">
+                    <button 
+                      className="action-btn edit-btn" 
+                      onClick={() => onEdit(item)}
+                    >
+                      <FaEdit />
+                    </button>
+
+                    <button 
+                      className="action-btn delete-btn" 
+                      onClick={() => onDelete(item)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
+                </div>
               </tr>
             ))}
           </tbody>
