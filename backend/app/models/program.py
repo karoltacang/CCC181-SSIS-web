@@ -49,6 +49,25 @@ class Program:
       return results
 
     @staticmethod
+    def search(search_term):
+        conn = get_db_connection()
+        cur = conn.cursor()
+        try:
+            query = '''
+                SELECT program_code, program_name, college_code 
+                FROM program
+                WHERE program_code ILIKE %s OR program_name ILIKE %s
+                ORDER BY program_code
+            '''
+            like_term = f'%{search_term}%'
+            cur.execute(query, (like_term, like_term))
+            columns = [desc[0] for desc in cur.description]
+            return [dict(zip(columns, row)) for row in cur.fetchall()]
+        finally:
+            cur.close()
+            conn.close()
+
+    @staticmethod
     def create(program_code, program_name, college_code):
       conn = get_db_connection()
       cur = conn.cursor()
