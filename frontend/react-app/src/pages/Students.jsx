@@ -6,23 +6,32 @@ const studentColumns = ["ID", "First Name", "Last Name", "Course", "Year", "Gend
 
 export default function Students() {
   const [studentData, setStudentData] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchStudents();
+    fetchStudents(); // Fetch all students on initial render
   }, []);
 
-  const fetchStudents = async () => {
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    fetchStudents(search.trim());
+  };
+
+  const fetchStudents = async (searchTerm) => {
     try {
       setLoading(true);
-      const response = await studentsAPI.getAll();
-      // Transform API data to match your table format
+      const response = await studentsAPI.getAll({ search: searchTerm });
+
       const formattedData = response.data.map(student => ({
         id: student.student_id,
         firstname: student.first_name,
         lastname: student.last_name,
-        course: student.program_code,
+        course: student.program_name,
         year: student.year_level,
         gender: student.gender || 'N/A'
       }));
@@ -39,5 +48,13 @@ export default function Students() {
   if (loading) return <div>Loading students...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  return <DataPage title="Students" data={studentData} columns={studentColumns} />;
+  return (
+    <DataPage
+      title="Students"
+      data={studentData}
+      columns={studentColumns}
+      search={search}
+      onSearchChange={handleSearchChange}
+      onSearchSubmit={handleSearchSubmit} />
+  );
 }
