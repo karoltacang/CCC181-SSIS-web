@@ -6,17 +6,26 @@ const collegeColumns = ["Code", "Name"];
 
 export default function Colleges() {
   const [collegeData, setCollegeData] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchColleges();
+    fetchColleges(); // Fetch all colleges on initial render
   }, []);
 
-  const fetchColleges = async () => {
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    fetchColleges(search.trim());
+  };
+
+  const fetchColleges = async (searchTerm) => {
     try {
       setLoading(true);
-      const response = await collegesAPI.getAll();
+      const response = await collegesAPI.getAll({ search: searchTerm });
       // Transform API data to match your table format
       const formattedData = response.data.map(college => ({
         code: college.college_code,
@@ -35,5 +44,13 @@ export default function Colleges() {
   if (loading) return <div>Loading colleges...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  return <DataPage title="Colleges" data={collegeData} columns={collegeColumns} />;
+  return (
+    <DataPage
+      title="Colleges"
+      data={collegeData}
+      columns={collegeColumns}
+      search={search}
+      onSearchChange={handleSearchChange}
+      onSearchSubmit={handleSearchSubmit} />
+  );
 }
