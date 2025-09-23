@@ -5,14 +5,17 @@ programs_bp = Blueprint('programs', __name__)
 
 @programs_bp.route('', methods=['GET'])
 def get_programs():
-  """Get all programs, optionally filtered by college_code."""
+  """Get all programs, optionally filtered by college_code or search."""
   try:
     college_code = request.args.get('college_code')
-    if college_code:
+    search_term = request.args.get('search')
+    
+    if search_term:
+      programs = Program.search(search_term)
+    elif college_code:
       programs = Program.get_by_college(college_code)
     else:
       programs = Program.get_all()
-    print("PROGRAMS:", programs)
     return jsonify(programs), 200
   except Exception as e:
     print("ERROR in /api/programs:", e)
