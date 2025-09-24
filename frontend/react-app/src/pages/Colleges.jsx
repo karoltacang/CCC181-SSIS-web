@@ -10,7 +10,7 @@ export default function Colleges() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(0);
+  const [perPage, setPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {

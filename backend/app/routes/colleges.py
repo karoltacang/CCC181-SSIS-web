@@ -9,7 +9,7 @@ def get_colleges():
   try:
     # Pagination params
     page = int(request.args.get('page', 1))
-    per_page = int(request.args,gett('pet_page', 10))
+    per_page = int(request.args.get('per_page', 10))
     search = request.args.get('search')
 
     # Paginated results

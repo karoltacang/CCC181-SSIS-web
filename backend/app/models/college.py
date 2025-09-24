@@ -21,12 +21,12 @@ class College:
         conditions.append('''
           (college_code ILIKE %s OR college_name ILIKE %s)
       ''')
-      like_term = f'%{search_term}%'
-      params.extend([like_term] * 5)
+        like_term = f'%{search_term}%'
+        params.extend([like_term, like_term])
 
       # WHERE clause
       if conditions:
-        where_clause = 'WHERE' + 'AND' .join(conditions)
+        where_clause = 'WHERE ' + ' AND '.join(conditions)
         query += where_clause
         count_query += where_clause
 
@@ -34,8 +34,8 @@ class College:
       cur.execute(count_query, params)
       total_count = cur.fetchone()[0]
 
-      # Pagiination
-      queryy += ' ORDER BY student_id LIMIT %s OFFSET %s'
+      # Pagination
+      query += ' ORDER BY college_code LIMIT %s OFFSET %s'
       offset = (page - 1) * per_page
       params.extend([per_page, offset])
 
@@ -103,6 +103,28 @@ class College:
         return affected > 0
       except Exception as e:
         conn.rollback()
+        raise e
+      finally:
+        cur.close()
+        conn.close()
+    
+    @staticmethod
+    def get_by_code(college_code):
+      conn = get_db_connection()
+      cur = conn.cursor()
+      try:
+        cur.execute(
+          'SELECT college_code, college_name FROM college WHERE college_code = %s',
+          (college_code,)
+        )
+        row = cur.fetchone()
+        if row:
+          return {
+            'college_code': row[0],
+            'college_name': row[1]
+          }
+        return None
+      except Exception as e:
         raise e
       finally:
         cur.close()
