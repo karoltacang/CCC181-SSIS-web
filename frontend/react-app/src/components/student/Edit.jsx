@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { studentsAPI } from '../../services/api';
 import '../Edit.css';
 
-function EditStudentModal({ isOpen, onClose, student, onSuccess }) {
+function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
   const [formData, setFormData] = useState({
     student_id: '',
     first_name: '',
@@ -92,29 +92,44 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess }) {
                 required
               />
               <label>Program *</label>
-              <input
-                type="text"
+              <select
                 name="program_code"
                 value={formData.program_code}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select Program</option>
+                {programs.map((prog) => (
+                  <option key={prog.program_code} value={prog.program_code}>{prog.program_code}</option>
+                ))}
+              </select>
               <label>Year Level *</label>
-              <input
+              <select
                 type="text"
                 name="year_level"
                 value={formData.year_level}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select Year Level</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
               <label>Gender *</label>
-              <input
+              <select
                 type="text"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
 
             {error && <div className="error-message">{error}</div>}

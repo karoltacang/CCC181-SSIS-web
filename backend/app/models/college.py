@@ -2,13 +2,14 @@ from app.db import get_db_connection
 
 class College:
     @staticmethod
-    def get_all(page=1, per_page=10, search_term=None):
+    def get_all(page=1, per_page=10, search_term=None, only_codes=False):
       conn = get_db_connection()
       cur = conn.cursor()
 
       # Base query
-      query = '''
-          SELECT college_code, college_name
+      columns = "college_code" if only_codes else "college_code, college_name"
+      query = f'''
+          SELECT {columns}
           FROM college
       '''
       count_query = 'SELECT COUNT(*) FROM college'

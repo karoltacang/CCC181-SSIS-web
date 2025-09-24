@@ -11,12 +11,14 @@ def get_colleges():
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 10))
     search = request.args.get('search')
+    only_codes = request.args.get('only_codes') == 'true'
 
     # Paginated results
     result = College.get_all(
       page=page,
       per_page=per_page,
-      search_term=search
+      search_term=search,
+      only_codes=only_codes
     )
 
     return jsonify(result),  200

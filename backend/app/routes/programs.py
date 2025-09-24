@@ -12,13 +12,15 @@ def get_programs():
     per_page = int(request.args.get('per_page', 10))
     college_code = request.args.get('college_code')
     search = request.args.get('search')
+    only_codes = request.args.get('only_codes') == 'true'
 
     # Get paginated results
     result = Program.get_all(
       page=page,
       per_page=per_page,
       college_code=college_code,
-      search_term=search
+      search_term=search,
+      only_codes=only_codes
     )
      
     return jsonify(result), 200

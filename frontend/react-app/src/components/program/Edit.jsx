@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { programsAPI } from '../../services/api';
 import '../Edit.css';
 
-function EditProgramModal({ isOpen, onClose, program, onSuccess }) {
+function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
   const [formData, setFormData] = useState({
     program_code: '',
     program_name: '',
@@ -78,13 +78,17 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess }) {
                 required
               />
               <label>College Code *</label>
-              <input
-                type="text"
+              <select
                 name="college_code"
                 value={formData.college_code}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select College</option>
+                {colleges.map((col) => (
+                  <option key={col.college_code} value={col.college_code}>{col.college_code}</option>
+                ))}
+              </select>
             </div>
 
             {error && <div className="error-message">{error}</div>}
