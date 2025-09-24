@@ -5,21 +5,25 @@ programs_bp = Blueprint('programs', __name__)
 
 @programs_bp.route('', methods=['GET'])
 def get_programs():
-  """Get all programs, optionally filtered by college_code or search."""
+  """Get all programs with pagination, optionally filtered by college_code or search."""
   try:
+    # Pagination params
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
     college_code = request.args.get('college_code')
-    search_term = request.args.get('search')
-    
-    if search_term:
-      programs = Program.search(search_term)
-    elif college_code:
-      programs = Program.get_by_college(college_code)
-    else:
-      programs = Program.get_all()
-    return jsonify(programs), 200
+    search = request.args.get('search')
+
+    # Get paginated results
+    result = Program.get_all(
+      page=page,
+      per_page=per_page,
+      college_code=college_code,
+      search_term=search
+    )
+     
+    return jsonify(result), 200
   except Exception as e:
-    print("ERROR in /api/programs:", e)
-    return jsonify({"error": "server error"}), 500
+    return jsonify({'error': str(e)}), 500
 
 @programs_bp.route('', methods=['POST'])
 def create_program():

@@ -2,70 +2,63 @@ from app.db import get_db_connection
 
 class Program:
     @staticmethod
-    def get_all():
+    def get_all(page=1, per_page=10, search_term=None, college_code=None):
       conn = get_db_connection()
       cur = conn.cursor()
-      cur.execute('''
-            SELECT program_code, program_name, college_code 
-            FROM program
-            ORDER BY program_code
-        ''')
-      columns = [desc[0] for desc in cur.description]
-      results = [dict(zip(columns, row)) for row in cur.fetchall()]
-      cur.close()
-      conn.close()
-      return results
-    
-    @staticmethod
-    def get_by_code(program_code):
-      conn = get_db_connection()
-      cur = conn.cursor()
-      cur.execute('''
-            SELECT program_code, program_name, college_code 
-            FROM program
-            WHERE program_code = %s
-        ''', (program_code,))
-      columns = [desc[0] for desc in cur.description]
-      row = cur.fetchone()
-      result = dict(zip(columns, row)) if row else None
-      cur.close()
-      conn.close()
-      return result
-    
-    @staticmethod
-    def get_by_college(college_code):
-      conn = get_db_connection()
-      cur = conn.cursor()
-      cur.execute('''
-            SELECT program_code, program_name, college_code 
-            FROM program
-            WHERE college_code = %s
-            ORDER BY program_code
-        ''', (college_code,))
-      columns = [desc[0] for desc in cur.description]
-      results = [dict(zip(columns, row)) for row in cur.fetchall()]
-      cur.close()
-      conn.close()
-      return results
 
-    @staticmethod
-    def search(search_term):
-        conn = get_db_connection()
-        cur = conn.cursor()
-        try:
-            query = '''
-                SELECT program_code, program_name, college_code 
-                FROM program
-                WHERE program_code ILIKE %s OR program_name ILIKE %s
-                ORDER BY program_code
-            '''
-            like_term = f'%{search_term}%'
-            cur.execute(query, (like_term, like_term))
-            columns = [desc[0] for desc in cur.description]
-            return [dict(zip(columns, row)) for row in cur.fetchall()]
-        finally:
-            cur.close()
-            conn.close()
+      # Base query
+      query = '''
+          SELECT program_code, program_name, college_code 
+          FROM program
+      '''
+      count_query = 'SELECT COUNT(*) FROM program'
+      
+      conditions = []
+      params = []
+
+      # Filters
+      if search_term:
+          conditions.append('''
+              (student_id ILIKE %s OR first_name ILIKE %s OR 
+                last_name ILIKE %s OR gender ILIKE %s OR program_code ILIKE %s)
+          ''')
+          like_term = f'%{search_term}%'
+          params.extend([like_term] * 5)
+      
+      if college_code:
+          conditions.append('program_code = %s')
+          params.append(college_code)
+
+      # WHERE clause (for filters)
+      if conditions:
+          where_clause = ' WHERE ' + ' AND '.join(conditions)
+          query += where_clause
+          count_query += where_clause
+      
+      # Get total count
+      cur.execute(count_query, params)
+      total_count = cur.fetchone()[0]
+
+      # Pagination
+      query += ' ORDER BY program_code LIMIT %s OFFSET %s'
+      offset = (page - 1) * per_page
+      params.extend([per_page, offset])
+      
+      # Execute query
+      cur.execute(query, params)
+      columns = [desc[0] for desc in cur.description]
+      results = [dict(zip(columns, row)) for row in cur.fetchall()]
+      
+      cur.close()
+      conn.close()
+      
+      return {
+          'data': results,
+          'total': total_count,
+          'page': page,
+          'per_page': per_page,
+          'total_pages': (total_count + per_page - 1) // per_page
+      }
 
     @staticmethod
     def create(program_code, program_name, college_code):

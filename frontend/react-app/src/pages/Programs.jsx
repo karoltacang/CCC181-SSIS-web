@@ -9,31 +9,55 @@ export default function Programs() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [ totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
-    fetchPrograms(search.trim()); // Fetch programs based on the current search term
-  }, []);
+    fetchPrograms(); // Fetch programs on initial render
+  }, [currentPage, perPage]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
 
   const handleSearchSubmit = () => {
+    setCurrentPage(1);
     fetchPrograms(search.trim());
   };
 
-  const fetchPrograms = async (searchTerm) => {
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePerPageChange = (perPage) => {
+    setPerPage(perPage);
+    setCurrentPage(1);
+  }
+
+  const fetchPrograms = async (searchTerm = search.trim()) => {
     try {
       setLoading(true);
-      const response = await programsAPI.getAll({ search: searchTerm });
+      const params = {
+        page: currentPage,
+        per_page: perPage,
+      }
 
-      const formattedData = response.data.map(program => ({
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      const response = await programsAPI.getAll(params);
+
+      const formattedData = response.data.data.map(program => ({
         code: program.program_code,
         name: program.program_name,
         college: program.college_code
       }));
+
       console.log(formattedData);
       setProgramData(formattedData);
+      setTotalCount(response.data.total);
       setError(null);
     } catch (err) {
       console.error('Error fetching programs:', err);
@@ -53,6 +77,12 @@ export default function Programs() {
       columns={programColumns}
       search={search}
       onSearchChange={handleSearchChange}
-      onSearchSubmit={handleSearchSubmit} />
+      onSearchSubmit={handleSearchSubmit}
+      totalCount={totalCount}
+      currentPage={currentPage}
+      perPage={perPage}
+      onPageChange={handlePageChange}
+      onPerPageChange={handlePerPageChange}
+      />
   );
 }
