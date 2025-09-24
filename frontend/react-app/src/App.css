@@ -174,15 +174,59 @@ tbody tr:hover {
 /* Pagination */
 .pagination {
   display: flex;
+  flex-direction: row;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: start;
   align-items: center;
   margin-top: auto;
   padding-top: 20px;
 }
 
-.pagination button {
+.pagination .per-page{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination select{
   border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  padding: 6px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pagination select option {
+  background: #f3f6ff;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 0;
+}
+
+/* Hover effect */
+.pagination select:hover {
+  background: #eef3ff;
+  border-color: #2751A2;
+}
+
+/* On focus (when clicked) */
+.pagination select:focus {
+  border-radius: 6px;
+  border-color: #eef3ff;
+  box-shadow: 0 0 4px rgba(39, 81, 162, 0.5);
+}
+
+.pagination .navigation{
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.pagination button {
+  border: 1px solid #ccc; 
   background: white;
   color: #333;
   padding: 6px 12px;

@@ -55,13 +55,30 @@ export default function DataPage({ title, data, columns, search, onSearchChange,
 
       {/* Pagination */}
       <div className="pagination">
-        <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>
-          Prev
+        <div className="per-page">
+          <p> Show </p>
+          <select
+      
+          >
+            {/*value={perPage}*/}
+            {/*onChange={(e) => setPerPage(Number(e.target.value))}*/}
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <p> per page </p>
+        </div>
+        
+        <div className="navigation">
+          <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            Prev
+          </button>
+          <span className="page-number">{page}</span>
+          <button className="btn" onClick={() => setPage(page + 1)}>
+            Next
         </button>
-        <span className="page-number">{page}</span>
-        <button className="btn" onClick={() => setPage(page + 1)}>
-          Next
-        </button>
+        </div>
       </div>
     </div>
   );
