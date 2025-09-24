@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import DataPage from "../components/DataPage";
+import EditCollegeModal from "../components/college/Edit";
 import { collegesAPI } from "../services/api";
 
 const collegeColumns = ["Code", "Name"];
@@ -12,6 +13,7 @@ export default function Colleges() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [editItem, setEditItem] = useState((null));
 
   useEffect(() => {
     fetchColleges(); // Fetch all colleges on initial render
@@ -65,22 +67,43 @@ export default function Colleges() {
     }
   };
 
+  const handleEdit = (item) => {
+    setEditItem(item);
+  }
+
+  const handleEditSuccess = () => {
+    setEditItem(null);
+    fetchColleges();
+  };
+
   if (loading) return <div>Loading colleges...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <DataPage
-      title="Colleges"
-      data={collegeData}
-      columns={collegeColumns}
-      search={search}
-      onSearchChange={handleSearchChange}
-      onSearchSubmit={handleSearchSubmit}
-      totalCount={totalCount}
-      currentPage={currentPage}
-      perPage={perPage}
-      onPageChange={handlePageChange}
-      onPerPageChange={handlePerPageChange}
+    <>
+      <DataPage
+        title="Colleges"
+        data={collegeData}
+        columns={collegeColumns}
+        search={search}
+        onSearchChange={handleSearchChange}
+        onSearchSubmit={handleSearchSubmit}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        perPage={perPage}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
+        onEdit={handleEdit}
       />
+
+      {editItem && (
+        <EditCollegeModal
+          isOpen={true}
+          college={editItem}
+          onClose={() => setEditItem(null)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+    </>
   );
 }
