@@ -5,14 +5,21 @@ colleges_bp = Blueprint('colleges', __name__)
 
 @colleges_bp.route('', methods=['GET'])
 def get_colleges():
-  """Get all colleges or search colleges."""
+  """Get all colleges or search colleges with pagination"""
   try:
-    search_term = request.args.get('search')
-    if search_term:
-      colleges = College.search(search_term)
-    else:
-      colleges = College.get_all()
-    return jsonify(colleges), 200
+    # Pagination params
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args,gett('pet_page', 10))
+    search = request.args.get('search')
+
+    # Paginated results
+    result = College.get_all(
+      page=page,
+      per_page=per_page,
+      search_term=search
+    )
+
+    return jsonify(result),  200
   except Exception as e:
     return jsonify({'error': str(e)}), 500
 

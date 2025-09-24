@@ -9,29 +9,53 @@ export default function Colleges() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     fetchColleges(); // Fetch all colleges on initial render
-  }, []);
+  }, [currentPage, perPage]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
 
   const handleSearchSubmit = () => {
+    setCurrentPage(1);
     fetchColleges(search.trim());
   };
 
-  const fetchColleges = async (searchTerm) => {
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePerPageChange = (perPage) => {
+    setPerPage(perPage);
+    setCurrentPage(1);
+  };
+
+  const fetchColleges = async (searchTerm = search.trim()) => {
     try {
       setLoading(true);
-      const response = await collegesAPI.getAll({ search: searchTerm });
-      // Transform API data to match your table format
-      const formattedData = response.data.map(college => ({
+      const params = {
+        page: currentPage,
+        per_page: perPage
+      }
+
+      if (searchTerm) {
+        params.search = searchTerm
+      }
+
+      const response = await collegesAPI.getAll(params);
+
+      const formattedData = response.data.data.map(college => ({
         code: college.college_code,
         name: college.college_name
       }));
+
       setCollegeData(formattedData);
+      setTotalCount(response.data.total);
       setError(null);
     } catch (err) {
       console.error('Error fetching colleges:', err);
@@ -51,6 +75,12 @@ export default function Colleges() {
       columns={collegeColumns}
       search={search}
       onSearchChange={handleSearchChange}
-      onSearchSubmit={handleSearchSubmit} />
+      onSearchSubmit={handleSearchSubmit}
+      totalCount={totalCount}
+      currentPage={currentPage}
+      perPage={perPage}
+      onPageChange={handlePageChange}
+      onPerPageChange={handlePerPageChange}
+      />
   );
 }

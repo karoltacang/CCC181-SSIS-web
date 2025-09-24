@@ -2,44 +2,58 @@ from app.db import get_db_connection
 
 class College:
     @staticmethod
-    def get_all():
+    def get_all(page=1, per_page=10, search_term=None):
       conn = get_db_connection()
       cur = conn.cursor()
-      cur.execute('SELECT college_code, college_name FROM college ORDER BY college_code')
-      columns = [desc[0] for desc in cur.description]
-      results = [dict(zip(columns, row)) for row in cur.fetchall()]
-      cur.close()
-      conn.close()
-      return results
-    
-    @staticmethod
-    def get_by_code(college_code):
-      conn = get_db_connection()
-      cur = conn.cursor()
-      cur.execute('SELECT college_code, college_name FROM college WHERE college_code = %s', (college_code,))
-      columns = [desc[0] for desc in cur.description]
-      row = cur.fetchone()
-      result = dict(zip(columns, row)) if row else None
-      cur.close()
-      conn.close()
-      return result
-    
-    @staticmethod
-    def search(search_term):
-      conn = get_db_connection()
-      cur = conn.cursor()
+
+      # Base query
       query = '''
-            SELECT college_code, college_name FROM college
-            WHERE college_code ILIKE %s OR college_name ILIKE %s
-            ORDER BY college_code
-        '''
+          SELECT college_code, college_name
+          FROM college
+      '''
+      count_query = 'SELECT COUNT(*) FROM college'
+
+      conditions = []
+      params = []
+
+      # Filters/search
+      if search_term:
+        conditions.append('''
+          (college_code ILIKE %s OR college_name ILIKE %s)
+      ''')
       like_term = f'%{search_term}%'
-      cur.execute(query, (like_term, like_term))
+      params.extend([like_term] * 5)
+
+      # WHERE clause
+      if conditions:
+        where_clause = 'WHERE' + 'AND' .join(conditions)
+        query += where_clause
+        count_query += where_clause
+
+      # Get total count
+      cur.execute(count_query, params)
+      total_count = cur.fetchone()[0]
+
+      # Pagiination
+      queryy += ' ORDER BY student_id LIMIT %s OFFSET %s'
+      offset = (page - 1) * per_page
+      params.extend([per_page, offset])
+
+      # Execute query
+      cur.execute(query, params)
       columns = [desc[0] for desc in cur.description]
       results = [dict(zip(columns, row)) for row in cur.fetchall()]
+
       cur.close()
       conn.close()
-      return results
+      
+      return {
+         'data': results,
+         'total': total_count,
+         'page': page,
+         'per_page': per_page,
+         'total_pages': (total_count + per_page - 1) // per_page
+      }
 
     @staticmethod
     def create(college_code, college_name):
