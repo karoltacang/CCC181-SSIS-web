@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import DataPage from "../components/DataPage";
+import EditProgramModal from "../components/program/Edit";
 import { programsAPI } from "../services/api";
 
 const programColumns = ["Code", "Name", "College"];
@@ -12,6 +13,7 @@ export default function Programs() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [ totalCount, setTotalCount] = useState(0);
+  const [editItem, setEditItem] = useState((null));
 
   useEffect(() => {
     fetchPrograms(); // Fetch programs on initial render
@@ -67,22 +69,43 @@ export default function Programs() {
     }
   };
 
+  const handleEdit = (item) => {
+    setEditItem(item);
+  }
+
+  const handleEditSuccess = () => {
+    setEditItem(null);
+    fetchPrograms();
+  };
+
   if (loading) return <div>Loading programs...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <DataPage
-      title="Programs"
-      data={programData}
-      columns={programColumns}
-      search={search}
-      onSearchChange={handleSearchChange}
-      onSearchSubmit={handleSearchSubmit}
-      totalCount={totalCount}
-      currentPage={currentPage}
-      perPage={perPage}
-      onPageChange={handlePageChange}
-      onPerPageChange={handlePerPageChange}
-      />
+    <>
+      <DataPage
+        title="Programs"
+        data={programData}
+        columns={programColumns}
+        search={search}
+        onSearchChange={handleSearchChange}
+        onSearchSubmit={handleSearchSubmit}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        perPage={perPage}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
+        onEdit={handleEdit}
+        />
+      
+      {editItem && (
+        <EditProgramModal
+          isOpen={true}
+          program={editItem}
+          onClose={() => setEditItem(null)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+    </>
   );
 }
