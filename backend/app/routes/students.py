@@ -5,19 +5,23 @@ students_bp = Blueprint('students', __name__)
 
 @students_bp.route('', methods=['GET'])
 def get_students():
-  """Get all students, optionally filtered by program_code or a search query."""
+  """Get all students with pagination, optionally filtered by program_code or a search query."""
   try:
+    # Pagination params
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
     program_code = request.args.get('program_code')
     search = request.args.get('search')
     
-    if program_code:
-      students = Student.get_by_program(program_code)
-    elif search:
-      students = Student.search(search)
-    else:
-      students = Student.get_all()
+    # Get paginated results
+    result = Student.get_all(
+        page=page,
+        per_page=per_page,
+        search_term=search,
+        program_code=program_code
+    )
     
-    return jsonify(students), 200
+    return jsonify(result), 200
   except Exception as e:
     return jsonify({'error': str(e)}), 500
 

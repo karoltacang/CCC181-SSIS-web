@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import DataPage from "../layout/DataPage";
+import DataPage from "../components/DataPage";
 import { studentsAPI } from "../services/api";
 
 const studentColumns = ["ID", "First Name", "Last Name", "Program", "Year", "Gender"];
@@ -9,25 +9,48 @@ export default function Students() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     fetchStudents(); // Fetch all students on initial render
-  }, []);
+  }, [currentPage, perPage]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
 
   const handleSearchSubmit = () => {
+    setCurrentPage(1);
     fetchStudents(search.trim());
   };
 
-  const fetchStudents = async (searchTerm) => {
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePerPageChange = (perPage) => {
+    setPerPage(perPage);
+    setCurrentPage(1);
+  };
+
+  const fetchStudents = async (searchTerm = search.trim()) => {
     try {
       setLoading(true);
-      const response = await studentsAPI.getAll({ search: searchTerm });
+      const params = {
+        page: currentPage,
+        per_page: perPage,
+      }
 
-      const formattedData = response.data.map(student => ({
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      const response = await studentsAPI.getAll(params);
+
+      console.log("RESPONSE DATA:", response.data);
+      const formattedData = response.data.data.map(student => ({
         id: student.student_id,
         firstname: student.first_name,
         lastname: student.last_name,
@@ -35,7 +58,9 @@ export default function Students() {
         year: student.year_level,
         gender: student.gender || 'N/A'
       }));
+
       setStudentData(formattedData);
+      setTotalCount(response.data.total);
       setError(null);
     } catch (err) {
       console.error('Error fetching students:', err);
@@ -55,6 +80,12 @@ export default function Students() {
       columns={studentColumns}
       search={search}
       onSearchChange={handleSearchChange}
-      onSearchSubmit={handleSearchSubmit} />
+      onSearchSubmit={handleSearchSubmit}
+      totalCount={totalCount}
+      currentPage={currentPage}
+      perPage={perPage}
+      onPageChange={handlePageChange}
+      onPerPageChange={handlePerPageChange}
+      />
   );
 }

@@ -2,19 +2,63 @@ from app.db import get_db_connection
 
 class Student:
     @staticmethod
-    def get_all():
+    def get_all(page=1, per_page=10, search_term=None, program_code=None):
       conn = get_db_connection()
       cur = conn.cursor()
-      cur.execute('''
-        SELECT student_id, first_name, last_name, year_level, gender, program_code
-        FROM student
-        ORDER BY student_id;
-      ''')
+
+      # Base query
+      query = '''
+          SELECT student_id, first_name, last_name, year_level, gender, program_code
+          FROM student
+      '''
+      count_query = 'SELECT COUNT(*) FROM student'
+      
+      conditions = []
+      params = []
+
+      # Filters
+      if search_term:
+          conditions.append('''
+              (student_id ILIKE %s OR first_name ILIKE %s OR 
+                last_name ILIKE %s OR gender ILIKE %s OR program_code ILIKE %s)
+          ''')
+          like_term = f'%{search_term}%'
+          params.extend([like_term] * 5)
+      
+      if program_code:
+          conditions.append('program_code = %s')
+          params.append(program_code)
+
+      # WHERE clause (for filters)
+      if conditions:
+          where_clause = ' WHERE ' + ' AND '.join(conditions)
+          query += where_clause
+          count_query += where_clause
+      
+      # Get total count
+      cur.execute(count_query, params)
+      total_count = cur.fetchone()[0]
+
+      # Pagination
+      query += ' ORDER BY student_id LIMIT %s OFFSET %s'
+      offset = (page - 1) * per_page
+      params.extend([per_page, offset])
+      
+      # Execute query
+      cur.execute(query, params)
       columns = [desc[0] for desc in cur.description]
       results = [dict(zip(columns, row)) for row in cur.fetchall()]
+      
       cur.close()
       conn.close()
-      return results
+      
+      return {
+          'data': results,
+          'total': total_count,
+          'page': page,
+          'per_page': per_page,
+          'total_pages': (total_count + per_page - 1) // per_page
+      }
     
     @staticmethod
     def get_by_id(student_id):
