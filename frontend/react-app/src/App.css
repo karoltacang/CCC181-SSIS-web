@@ -172,7 +172,7 @@ tbody tr:hover {
   margin-bottom: 20px;
 }
 
-.search-bar {
+.search-sort .search-bar {
   padding: 8px;
   font-size: 14px;
   background-color: white;
@@ -182,10 +182,41 @@ tbody tr:hover {
   width: 500px;
 }
 
-.sort-btn {
+.search-sort .right-side{
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.search-sort .sort-btn {
   padding: 8px 12px;
   font-size: 14px;
   margin-left: auto;
+}
+
+.search-sort .per-page{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.search-sort select{
+  border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  padding: 6px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.search-sort select option {
+  background: #f3f6ff;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 0;
 }
 
 /* Buttons */
@@ -225,29 +256,6 @@ tbody tr:hover {
   align-items: center;
   margin-top: auto;
   padding-top: 20px;
-}
-
-.pagination .per-page{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-}
-
-.pagination select{
-  border: 1px solid #ccc;
-  background: white;
-  color: #333;
-  padding: 6px 6px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.pagination select option {
-  background: #f3f6ff;
-  color: #333;
-  padding: 6px 12px;
-  border-radius: 0;
 }
 
 /* Hover effect */

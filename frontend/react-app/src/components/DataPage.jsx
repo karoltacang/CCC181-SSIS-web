@@ -75,12 +75,19 @@ export default function DataPage({
             }
           }}
         />
-        <button className="btn btn-outline sort-btn">Sort</button>
-      </div>
-
-      {/* Results count (remove later)*/}
-      <div className="results-info">
-        Showing {startIndex} to {endIndex} of {totalCount} results
+        <div className="right-side">
+          <div className="per-page">
+            <p> Show </p>
+            <select value={perPage} onChange={handlePerPageSelect} >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+            <p> per page </p>
+          </div>
+          <button className="btn btn-outline sort-btn">Sort</button>
+        </div>
       </div>
 
       {/* Table */}
@@ -125,17 +132,10 @@ export default function DataPage({
 
       {/* Pagination */}
       <div className="pagination">
-        <div className="per-page">
-          <p> Show </p>
-          <select value={perPage} onChange={handlePerPageSelect} >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-          </select>
-          <p> per page </p>
+        {/* Results count (remove later)*/}
+        <div className="results-info">
+          Showing {startIndex} to {endIndex} of {totalCount} results
         </div>
-        
         <div className="navigation">
           <button 
             className="btn" 
