@@ -229,22 +229,32 @@ tbody tr:hover {
 }
 
 .btn-primary {
-  background-color: #2751A2;
+  background-color: var(--primary-color);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #204188;
+  background-color: var(--primary-hover);
 }
 
 .btn-outline {
   background: white;
-  border: 1px solid #2751A2;
-  color: #2751A2;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
 }
 
 .btn-outline:hover {
-  background: #f1f4fa;
+  background: var(--primary-subtle);
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background: var(--primary-subtle);
 }
 
 /* Pagination */

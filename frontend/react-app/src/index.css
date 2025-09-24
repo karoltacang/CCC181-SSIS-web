@@ -13,6 +13,13 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --primary-color: #2751A2;
+  --primary-hover: #204188;
+  --primary-light: #e9effc;
+  --primary-lighter: #eef3ff;
+  --primary-subtle: #f3f6ff;
+  --primary-selected: #d8e4ff;
 }
 
 a {
