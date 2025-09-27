@@ -20,14 +20,13 @@ class Program:
       # Filters
       if search_term:
           conditions.append('''
-              (student_id ILIKE %s OR first_name ILIKE %s OR 
-                last_name ILIKE %s OR gender ILIKE %s OR program_code ILIKE %s)
+              (program_code ILIKE %s OR program_name ILIKE %s)
           ''')
           like_term = f'%{search_term}%'
-          params.extend([like_term] * 5)
+          params.extend([like_term] * 2)
       
       if college_code:
-          conditions.append('program_code = %s')
+          conditions.append('college_code = %s')
           params.append(college_code)
 
       # WHERE clause (for filters)
@@ -74,6 +73,29 @@ class Program:
         return True
       except Exception as e:
         conn.rollback()
+        raise e
+      finally:
+        cur.close()
+        conn.close()
+    
+    @staticmethod
+    def get_by_code(program_code):
+      conn = get_db_connection()
+      cur = conn.cursor()
+      try:
+        cur.execute(
+          'SELECT program_code, program_name, college_code FROM program WHERE program_code = %s',
+          (program_code,)
+        )
+        row = cur.fetchone()
+        if row:
+          return {
+            'program_code': row[0],
+            'program_name': row[1],
+            'college_code': row[2]
+          }
+        return None
+      except Exception as e:
         raise e
       finally:
         cur.close()

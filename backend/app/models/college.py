@@ -57,6 +57,28 @@ class College:
       }
 
     @staticmethod
+    def get_by_code(college_code):
+      conn = get_db_connection()
+      cur = conn.cursor()
+      try:
+        cur.execute(
+          'SELECT college_code, college_name FROM college WHERE college_code = %s',
+          (college_code,)
+        )
+        row = cur.fetchone()
+        if row:
+          return {
+            'college_code': row[0],
+            'college_name': row[1]
+          }
+        return None
+      except Exception as e:
+        raise e
+      finally:
+        cur.close()
+        conn.close()
+
+    @staticmethod
     def create(college_code, college_name):
       conn = get_db_connection()
       cur = conn.cursor()

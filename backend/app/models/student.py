@@ -80,6 +80,32 @@ class Student:
         conn.close()
     
     @staticmethod
+    def get_by_id(student_id):
+      conn = get_db_connection()
+      cur = conn.cursor()
+      try:
+        cur.execute(
+          'SELECT student_id, first_name, last_name, year_level, gender, program_code FROM student WHERE student_id = %s',
+          (student_id,)
+        )
+        row = cur.fetchone()
+        if row:
+          return {
+            'student_id': row[0],
+            'first_name': row[1],
+            'last_name': row[2],
+            'year_level': row[3],
+            'gender': row[4],
+            'program_code': row[5]
+          }
+        return None
+      except Exception as e:
+        raise e
+      finally:
+        cur.close()
+        conn.close()
+    
+    @staticmethod
     def update(student_id, first_name, last_name, year_level, gender, program_code):
       conn = get_db_connection()
       cur = conn.cursor()
