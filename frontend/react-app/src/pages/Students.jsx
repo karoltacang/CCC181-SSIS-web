@@ -3,7 +3,7 @@ import { studentsAPI, programsAPI } from "../services/api";
 import EditStudentModal from "../components/student/Edit";
 import AddStudentModal from "../components/student/Add";
 import DeleteModal from "../components/global/Delete";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import Table from "../components/global/Table";
 import "../App.css";
 
 const studentColumns = ["ID", "First Name", "Last Name", "Program", "Year", "Gender"];
@@ -56,9 +56,9 @@ export default function Students() {
     setCurrentPage(1);
   };
 
-  const fetchStudents = async (searchTerm = search.trim()) => {
+  const fetchStudents = async (searchTerm = search.trim(), background = false) => {
     try {
-      setLoading(true);
+      if (!background) setLoading(true);
       const params = {
         page: currentPage,
         per_page: perPage,
@@ -97,7 +97,7 @@ export default function Students() {
 
   const handleEditSuccess = () => {
     setEditItem(null);
-    fetchStudents();
+    fetchStudents(undefined, true);
   }
 
   const handleDelete = (item) => {
@@ -108,7 +108,7 @@ export default function Students() {
     try {
       await studentsAPI.delete(deleteItem.id);
       setDeleteItem(null);
-      fetchStudents();
+      fetchStudents(undefined, true);
     } catch (err) {
       console.error("Error deleting student:", err);
       setError("Failed to delete student");
@@ -181,29 +181,12 @@ export default function Students() {
         </div>
 
         {/* Table */}
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                {studentColumns.map((col) => <th key={col}>{col}</th>)}
-                <th> Actions </th>
-              </tr>
-            </thead>
-            <tbody>
-              {studentData.map((item, index) => (
-                <tr key={index}>
-                  {studentColumns.map((col) => (
-                    <td key={col}>{item[col.toLowerCase().replace(/\s/g, "")]}</td>
-                  ))}
-                  <td className="actions-cell">
-                    <button className="action-btn edit-btn" onClick={() => handleEdit(item)}><FaEdit /></button>
-                    <button className="action-btn delete-btn" onClick={() => handleDelete(item)}><FaTrash /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          columns={studentColumns}
+          data={studentData}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
         {/* Pagination */}
         <div className="pagination">
@@ -244,7 +227,7 @@ export default function Students() {
         <AddStudentModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={fetchStudents}
+          onSuccess={() => fetchStudents(undefined, true)}
           programs={programsList}
         />
       )}

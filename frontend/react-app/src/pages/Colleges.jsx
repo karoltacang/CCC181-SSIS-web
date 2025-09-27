@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import EditCollegeModal from "../components/college/Edit";
 import AddCollegeModal from "../components/college/Add";
 import DeleteModal from "../components/global/Delete";
+import Table from "../components/global/Table";
 import { collegesAPI } from "../services/api";
-import { FaEdit, FaTrash } from "react-icons/fa";
 import "../App.css";
 
 const collegeColumns = ["Code", "Name"];
@@ -43,9 +43,9 @@ export default function Colleges() {
     setCurrentPage(1);
   };
 
-  const fetchColleges = async (searchTerm = search.trim()) => {
+  const fetchColleges = async (searchTerm = search.trim(), background = false) => {
     try {
-      setLoading(true);
+      if (!background) setLoading(true);
       const params = {
         page: currentPage,
         per_page: perPage
@@ -79,7 +79,7 @@ export default function Colleges() {
 
   const handleEditSuccess = () => {
     setEditItem(null);
-    fetchColleges();
+    fetchColleges(undefined, true);
   };
 
   const handleDelete = (item) => {
@@ -90,7 +90,7 @@ export default function Colleges() {
     try {
       await collegesAPI.delete(deleteItem.code);
       setDeleteItem(null);
-      fetchColleges();
+      fetchColleges(undefined, true);
     } catch (err) {
       console.error("Error deleting college:", err);
       setError("Failed to delete college");
@@ -163,29 +163,12 @@ export default function Colleges() {
         </div>
 
         {/* Table */}
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                {collegeColumns.map((col) => <th key={col}>{col}</th>)}
-                <th> Actions </th>
-              </tr>
-            </thead>
-            <tbody>
-              {collegeData.map((item, index) => (
-                <tr key={index}>
-                  {collegeColumns.map((col) => (
-                    <td key={col}>{item[col.toLowerCase().replace(/\s/g, "")]}</td>
-                  ))}
-                  <td className="actions-cell">
-                    <button className="action-btn edit-btn" onClick={() => handleEdit(item)}><FaEdit /></button>
-                    <button className="action-btn delete-btn" onClick={() => handleDelete(item)}><FaTrash /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          columns={collegeColumns}
+          data={collegeData}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
         {/* Pagination */}
         <div className="pagination">
@@ -225,7 +208,7 @@ export default function Colleges() {
         <AddCollegeModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={fetchColleges}
+          onSuccess={() => fetchColleges(undefined, true)}
         />
       )}
     </>

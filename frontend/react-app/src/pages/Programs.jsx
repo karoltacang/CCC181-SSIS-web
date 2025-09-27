@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import EditProgramModal from "../components/program/Edit";
 import AddProgramModal from "../components/program/Add";
 import DeleteModal from "../components/global/Delete";
+import Table from "../components/global/Table";
 import { programsAPI, collegesAPI } from "../services/api";
-import { FaEdit, FaTrash } from "react-icons/fa";
 import "../App.css";
 
 const programColumns = ["Code", "Name", "College"];
@@ -56,9 +56,9 @@ export default function Programs() {
     setCurrentPage(1);
   }
 
-  const fetchPrograms = async (searchTerm = search.trim()) => {
+  const fetchPrograms = async (searchTerm = search.trim(), background = false) => {
     try {
-      setLoading(true);
+      if (!background) setLoading(true);
       const params = {
         page: currentPage,
         per_page: perPage,
@@ -94,7 +94,7 @@ export default function Programs() {
 
   const handleEditSuccess = () => {
     setEditItem(null);
-    fetchPrograms();
+    fetchPrograms(undefined, true);
   };
 
   const handleDelete = (item) => {
@@ -105,7 +105,7 @@ export default function Programs() {
     try {
       await programsAPI.delete(deleteItem.code);
       setDeleteItem(null);
-      fetchPrograms();
+      fetchPrograms(undefined, true);
     } catch (err) {
       console.error("Error deleting program:", err);
       setError("Failed to delete program");
@@ -178,29 +178,12 @@ export default function Programs() {
         </div>
 
         {/* Table */}
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                {programColumns.map((col) => <th key={col}>{col}</th>)}
-                <th> Actions </th>
-              </tr>
-            </thead>
-            <tbody>
-              {programData.map((item, index) => (
-                <tr key={index}>
-                  {programColumns.map((col) => (
-                    <td key={col}>{item[col.toLowerCase().replace(/\s/g, "")]}</td>
-                  ))}
-                  <td className="actions-cell">
-                    <button className="action-btn edit-btn" onClick={() => handleEdit(item)}><FaEdit /></button>
-                    <button className="action-btn delete-btn" onClick={() => handleDelete(item)}><FaTrash /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          columns={programColumns}
+          data={programData}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
         {/* Pagination */}
         <div className="pagination">
@@ -241,7 +224,7 @@ export default function Programs() {
         <AddProgramModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={fetchPrograms}
+          onSuccess={() => fetchPrograms(undefined, true)}
           colleges={collegesList}
         />
       )}
