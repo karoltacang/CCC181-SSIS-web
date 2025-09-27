@@ -20,6 +20,14 @@
   --primary-lighter: #eef3ff;
   --primary-subtle: #f3f6ff;
   --primary-selected: #d8e4ff;
+
+  --text-main: #204188;
+  --text-secondary: #374151;
+  --text-muted: #aec0e4;
+  --text-light: #ffffff;
+
+  --danger: #b54141;
+  --danger-hover: #651c1c;
 }
 
 a {
@@ -29,19 +37,6 @@ a {
 }
 a:hover {
   color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
 }
 
 button {
