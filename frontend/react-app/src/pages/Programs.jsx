@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import EditProgramModal from "../components/program/Edit";
+import AddProgramModal from "../components/program/Add";
 import DeleteModal from "../components/global/Delete";
 import { programsAPI, collegesAPI } from "../services/api";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -19,6 +20,7 @@ export default function Programs() {
   const [deleteItem, setDeleteItem] = useState(null);
   const [goToPage, setGoToPage] = useState("");
   const [collegesList, setCollegesList] = useState([]);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchPrograms(); // Fetch programs on initial render
@@ -146,7 +148,7 @@ export default function Programs() {
           <h1 className="title">Programs</h1>
           <div className="action-buttons">
             <button className="btn btn-outline">Export</button>
-            <button className="btn btn-primary">+ Add new program</button>
+            <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new program</button>
           </div>
         </div>
 
@@ -232,6 +234,15 @@ export default function Programs() {
           onClose={() => setDeleteItem(null)}
           onConfirm={handleDeleteConfirm}
           itemName={`${deleteItem.code} - ${deleteItem.name}`}
+        />
+      )}
+
+      {addModalOpen && (
+        <AddProgramModal
+          isOpen={addModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          onSuccess={fetchPrograms}
+          colleges={collegesList}
         />
       )}
     </>

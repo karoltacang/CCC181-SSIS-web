@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import EditCollegeModal from "../components/college/Edit";
+import AddCollegeModal from "../components/college/Add";
 import DeleteModal from "../components/global/Delete";
 import { collegesAPI } from "../services/api";
 import { FaEdit, FaTrash } from "react-icons/fa";
@@ -18,6 +19,7 @@ export default function Colleges() {
   const [editItem, setEditItem] = useState((null));
   const [deleteItem, setDeleteItem] = useState(null);
   const [goToPage, setGoToPage] = useState("");
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchColleges(); // Fetch all colleges on initial render
@@ -131,7 +133,7 @@ export default function Colleges() {
           <h1 className="title">Colleges</h1>
           <div className="action-buttons">
             <button className="btn btn-outline">Export</button>
-            <button className="btn btn-primary">+ Add new college</button>
+            <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new college</button>
           </div>
         </div>
 
@@ -216,6 +218,14 @@ export default function Colleges() {
           onClose={() => setDeleteItem(null)}
           onConfirm={handleDeleteConfirm}
           itemName={`${deleteItem.code} - ${deleteItem.name}`}
+        />
+      )}
+
+      {addModalOpen && (
+        <AddCollegeModal
+          isOpen={addModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          onSuccess={fetchColleges}
         />
       )}
     </>
