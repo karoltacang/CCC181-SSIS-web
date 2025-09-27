@@ -58,14 +58,30 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
 
         <div className="edit-body">
           <form onSubmit={handleSubmit}>
-            <div className="form-group inactive">
-              <label>Program Code</label>
-              <input
-                type="text"
-                name="program_code"
-                value={formData.program_code}
-                disabled
-              />
+            <div className="form-row">
+              <div className="form-group inactive">
+                <label>Program Code</label>
+                <input
+                  type="text"
+                  name="program_code"
+                  value={formData.program_code}
+                  disabled
+                />
+              </div>
+              <div className="form-group">
+                <label>College Code *</label>
+                <select
+                  name="college_code"
+                  value={formData.college_code}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select College</option>
+                  {colleges.map((col) => (
+                    <option key={col.college_code} value={col.college_code}>{col.college_code}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="form-group">
@@ -77,18 +93,6 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
                 onChange={handleChange}
                 required
               />
-              <label>College Code *</label>
-              <select
-                name="college_code"
-                value={formData.college_code}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select College</option>
-                {colleges.map((col) => (
-                  <option key={col.college_code} value={col.college_code}>{col.college_code}</option>
-                ))}
-              </select>
             </div>
 
             {error && <div className="error-message">{error}</div>}

@@ -64,14 +64,32 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
 
         <div className="edit-body">
           <form onSubmit={handleSubmit}>
-            <div className="form-group inactive">
-              <label>Student ID</label>
-              <input
-                type="text"
-                name="student_id"
-                value={formData.student_id}
-                disabled
-              />
+            <div className="form-row">
+              <div className="form-group inactive">
+                <label>Student ID</label>
+                <input
+                  type="text"
+                  name="student_id"
+                  value={formData.student_id}
+                  disabled
+                />
+              </div>
+              <div className="form-group">
+                <label>Year Level *</label>
+                <select
+                  type="text"
+                  name="year_level"
+                  value={formData.year_level}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Year Level</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
             </div>
 
             <div className="form-group">
@@ -83,6 +101,9 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
                 onChange={handleChange}
                 required
               />
+            </div>
+
+            <div className="form-group">
               <label>Last Name *</label>
               <input
                 type="text"
@@ -91,45 +112,38 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
                 onChange={handleChange}
                 required
               />
-              <label>Program *</label>
-              <select
-                name="program_code"
-                value={formData.program_code}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Program</option>
-                {programs.map((prog) => (
-                  <option key={prog.program_code} value={prog.program_code}>{prog.program_code}</option>
-                ))}
-              </select>
-              <label>Year Level *</label>
-              <select
-                type="text"
-                name="year_level"
-                value={formData.year_level}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Year Level</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-              <label>Gender *</label>
-              <select
-                type="text"
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Program *</label>
+                <select
+                  name="program_code"
+                  value={formData.program_code}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Program</option>
+                  {programs.map((prog) => (
+                    <option key={prog.program_code} value={prog.program_code}>{prog.program_code}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Gender *</label>
+                <select
+                  type="text"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}
