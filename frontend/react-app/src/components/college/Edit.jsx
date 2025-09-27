@@ -47,11 +47,11 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
   if (!isOpen) return null;
 
   return (
-    <div className="edit-overlay" onClick={onClose}>
-      <div className="edit-content" onClick={(e) => e.stopPropagation()}>
-        <div className="edit-header">
+    <div className="overlay" onClick={onClose}>
+      <div className="content" onClick={(e) => e.stopPropagation()}>
+        <div className="header">
           <h2>Edit College</h2>
-          <button className="edit-close" onClick={onClose}>&times;</button>
+          <button className="close" onClick={onClose}>&times;</button>
         </div>
 
         <div className="edit-body">

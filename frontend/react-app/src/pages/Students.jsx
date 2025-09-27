@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { studentsAPI, programsAPI } from "../services/api";
 import EditStudentModal from "../components/student/Edit";
+import AddStudentModal from "../components/student/Add";
 import DeleteModal from "../components/global/Delete";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import "../App.css";
@@ -19,6 +20,7 @@ export default function Students() {
   const [deleteItem, setDeleteItem] = useState(null);
   const [goToPage, setGoToPage] = useState("");
   const [programsList, setProgramsList] = useState([]);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchStudents(); // Fetch all students on initial render
@@ -149,7 +151,7 @@ export default function Students() {
           <h1 className="title">Students</h1>
           <div className="action-buttons">
             <button className="btn btn-outline">Export</button>
-            <button className="btn btn-primary">+ Add new student</button>
+            <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new student</button>
           </div>
         </div>
 
@@ -235,6 +237,15 @@ export default function Students() {
           onClose={() => setDeleteItem(null)}
           onConfirm={handleDeleteConfirm}
           itemName={`${deleteItem.id} - ${deleteItem.firstname} ${deleteItem.lastname}`}
+        />
+      )}
+
+      {addModalOpen && (
+        <AddStudentModal
+          isOpen={addModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          onSuccess={fetchStudents}
+          programs={programsList}
         />
       )}
     </>
