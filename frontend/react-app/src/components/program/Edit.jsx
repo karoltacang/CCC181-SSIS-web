@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { programsAPI } from '../../services/api';
-import '../Edit.css';
+import '../Components.css';
 
 function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
   const [formData, setFormData] = useState({

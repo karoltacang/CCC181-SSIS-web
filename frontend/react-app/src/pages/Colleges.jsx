@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import EditCollegeModal from "../components/college/Edit";
+import DeleteModal from "../components/global/Delete";
 import { collegesAPI } from "../services/api";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import "../App.css";
@@ -15,6 +16,7 @@ export default function Colleges() {
   const [perPage, setPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [editItem, setEditItem] = useState((null));
+  const [deleteItem, setDeleteItem] = useState(null);
   const [goToPage, setGoToPage] = useState("");
 
   useEffect(() => {
@@ -79,8 +81,18 @@ export default function Colleges() {
   };
 
   const handleDelete = (item) => {
-    console.log("Delete clicked for:", item);
-    // Implement delete logic here
+    setDeleteItem(item);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await collegesAPI.delete(deleteItem.code);
+      setDeleteItem(null);
+      fetchColleges();
+    } catch (err) {
+      console.error("Error deleting college:", err);
+      setError("Failed to delete college");
+    }
   };
 
   // Pagination Logic
@@ -195,6 +207,15 @@ export default function Colleges() {
           college={editItem}
           onClose={() => setEditItem(null)}
           onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {deleteItem && (
+        <DeleteModal
+          isOpen={true}
+          onClose={() => setDeleteItem(null)}
+          onConfirm={handleDeleteConfirm}
+          itemName={`${deleteItem.code} - ${deleteItem.name}`}
         />
       )}
     </>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { studentsAPI } from "../services/api";
+import { studentsAPI, programsAPI } from "../services/api";
 import EditStudentModal from "../components/student/Edit";
+import DeleteModal from "../components/global/Delete";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import "../App.css";
 
@@ -15,11 +16,25 @@ export default function Students() {
   const [perPage, setPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [editItem, setEditItem] = useState(null);
+  const [deleteItem, setDeleteItem] = useState(null);
   const [goToPage, setGoToPage] = useState("");
+  const [programsList, setProgramsList] = useState([]);
 
   useEffect(() => {
     fetchStudents(); // Fetch all students on initial render
   }, [currentPage, perPage]);
+
+  useEffect(() => {
+    const fetchProgramsList = async () => {
+      try {
+        const response = await programsAPI.getAll({ per_page: 1000, only_codes: true });
+        setProgramsList(response.data.data || []);
+      } catch (err) {
+        console.error("Failed to pre-fetch programs:", err);
+      }
+    };
+    fetchProgramsList();
+  }, []);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -84,8 +99,18 @@ export default function Students() {
   }
 
   const handleDelete = (item) => {
-    console.log("Delete clicked for:", item);
-    // Implement delete logic here
+    setDeleteItem(item);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await studentsAPI.delete(deleteItem.id);
+      setDeleteItem(null);
+      fetchStudents();
+    } catch (err) {
+      console.error("Error deleting student:", err);
+      setError("Failed to delete student");
+    }
   };
 
   // Pagination Logic
@@ -200,6 +225,16 @@ export default function Students() {
           student={editItem}
           onClose={() => setEditItem(null)}
           onSuccess={handleEditSuccess}
+          programs={programsList}
+        />
+      )}
+
+      {deleteItem && (
+        <DeleteModal
+          isOpen={true}
+          onClose={() => setDeleteItem(null)}
+          onConfirm={handleDeleteConfirm}
+          itemName={`${deleteItem.id} - ${deleteItem.firstname} ${deleteItem.lastname}`}
         />
       )}
     </>

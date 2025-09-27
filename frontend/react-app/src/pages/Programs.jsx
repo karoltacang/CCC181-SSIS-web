@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import EditProgramModal from "../components/program/Edit";
-import { programsAPI } from "../services/api";
+import DeleteModal from "../components/global/Delete";
+import { programsAPI, collegesAPI } from "../services/api";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import "../App.css";
 
@@ -15,11 +16,25 @@ export default function Programs() {
   const [perPage, setPerPage] = useState(10);
   const [ totalCount, setTotalCount] = useState(0);
   const [editItem, setEditItem] = useState((null));
+  const [deleteItem, setDeleteItem] = useState(null);
   const [goToPage, setGoToPage] = useState("");
+  const [collegesList, setCollegesList] = useState([]);
 
   useEffect(() => {
     fetchPrograms(); // Fetch programs on initial render
   }, [currentPage, perPage]);
+
+  useEffect(() => {
+    const fetchCollegesList = async () => {
+      try {
+        const response = await collegesAPI.getAll({ per_page: 1000, only_codes: true });
+        setCollegesList(response.data.data || []);
+      } catch (err) {
+        console.error("Failed to pre-fetch colleges:", err);
+      }
+    };
+    fetchCollegesList();
+  }, []);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -81,8 +96,18 @@ export default function Programs() {
   };
 
   const handleDelete = (item) => {
-    console.log("Delete clicked for:", item);
-    // Implement delete logic here
+    setDeleteItem(item);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await programsAPI.delete(deleteItem.code);
+      setDeleteItem(null);
+      fetchPrograms();
+    } catch (err) {
+      console.error("Error deleting program:", err);
+      setError("Failed to delete program");
+    }
   };
 
   // Pagination Logic
@@ -197,6 +222,16 @@ export default function Programs() {
           program={editItem}
           onClose={() => setEditItem(null)}
           onSuccess={handleEditSuccess}
+          colleges={collegesList}
+        />
+      )}
+
+      {deleteItem && (
+        <DeleteModal
+          isOpen={true}
+          onClose={() => setDeleteItem(null)}
+          onConfirm={handleDeleteConfirm}
+          itemName={`${deleteItem.code} - ${deleteItem.name}`}
         />
       )}
     </>
