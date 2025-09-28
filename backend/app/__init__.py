@@ -5,9 +5,8 @@ import os
 
 def create_app():
   # Define the static folder for the React production build
-  # The path needs to go up three levels from __file__ to reach the project root.
-  project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-  static_folder = os.path.join(project_root, 'frontend', 'react-app', 'dist')
+  project_root = os.path.dirname(os.path.dirname(__file__))
+  static_folder = os.path.join(project_root, 'static')
   
   # Initialize Flask to serve static files from the React build folder
   app = Flask(__name__, static_folder=static_folder, static_url_path='')

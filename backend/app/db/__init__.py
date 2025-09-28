@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from flask import g
 from app.config import Config
 
 def get_db_connection():
@@ -11,3 +12,16 @@ def get_db_connection():
   password=Config.DB_PASSWORD
   )
   return conn
+
+def get_db():
+  if 'db' not in g:
+    g.db = get_db_connection()
+  return g.db
+
+def close_db(e=None):
+  db = g.pop('db', None)
+  if db is not None:
+    db.close()
+
+def init_app(app):
+  app.teardown_appcontext(close_db)
