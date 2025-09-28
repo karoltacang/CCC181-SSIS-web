@@ -140,7 +140,6 @@ export default function Students() {
     }
   };
 
-  if (loading) return <div>Loading students...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (

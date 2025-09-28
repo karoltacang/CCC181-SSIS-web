@@ -1,23 +1,63 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import "../App.css";
 
 export default function Sidebar() {
   return (
     <div className="sidebar">
-      <div className="logo">SSIS</div>
-      <ul>
-        <li>
-          <Link to="/students">Students</Link>
-        </li>
-        <li>
-          <Link to="/programs">Programs</Link>
-        </li>
-        <li>
-          <Link to="/colleges">Colleges</Link>
-        </li>
-        <li>
-          <Link to="/settings">Settings</Link>
-        </li>
-      </ul>
+      {/* User Profile Section */}
+      <div className="sidebar-header">
+        <div className="user-avatar">
+          <img 
+            src="https://via.placeholder.com/80" 
+            alt="User Avatar" 
+          />
+        </div>
+        <h3 className="user-name">Admin User</h3>
+        <p className="user-email">admin@ssis.edu</p>
+      </div>
+
+      {/* Navigation Menu */}
+      <nav className="sidebar-nav">
+        <NavLink 
+          to="/settings" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <span className="nav-icon"> </span>
+          <span className="nav-label">Dashboard</span>
+        </NavLink>
+        
+        <NavLink 
+          to="/students" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <span className="nav-icon"> </span>
+          <span className="nav-label">Students</span>
+        </NavLink>
+
+        <NavLink 
+          to="/programs" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <span className="nav-icon"> </span>
+          <span className="nav-label">Programs</span>
+        </NavLink>
+
+        <NavLink 
+          to="/colleges" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+        >
+          <span className="nav-icon"> </span>
+          <span className="nav-label">Colleges</span>
+        </NavLink>
+      </nav>
+
+      {/* Logout Button */}
+      <div className="sidebar-footer">
+        <button className="logout-btn" onClick={() => console.log('Logout')}>
+          <span className="nav-icon"> </span>
+          <span className="nav-label">Logout</span>
+        </button>
+      </div>
     </div>
   );
 }

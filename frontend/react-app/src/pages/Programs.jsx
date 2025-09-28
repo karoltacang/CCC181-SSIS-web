@@ -137,7 +137,6 @@ export default function Programs() {
     }
   };
 
-  if (loading) return <div>Loading programs...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (

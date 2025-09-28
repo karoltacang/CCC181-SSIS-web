@@ -122,7 +122,6 @@ export default function Colleges() {
     }
   };
 
-  if (loading) return <div>Loading colleges...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -163,12 +162,19 @@ export default function Colleges() {
         </div>
 
         {/* Table */}
-        <Table
-          columns={collegeColumns}
-          data={collegeData}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className="table-wrapper">
+          {loading && (
+            <div className="loading-overlay">
+              Loading...
+            </div>
+          )}
+          <Table
+            columns={collegeColumns}
+            data={collegeData}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
 
         {/* Pagination */}
         <div className="pagination">
