@@ -6,8 +6,7 @@ body {
 .data-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
 }
 
 .app {
@@ -203,17 +202,13 @@ body {
   box-sizing: border-box;
   border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 /* Global Table Styles */
 .table-container {
-  flex-grow: 1;
-  overflow-y: auto;
   overflow-x: auto;
   margin-bottom: 1rem;
   position: relative;
-  max-height: 100%;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   background: white;

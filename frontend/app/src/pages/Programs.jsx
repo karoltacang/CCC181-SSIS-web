@@ -211,12 +211,19 @@ export default function Programs() {
         </div>
 
         {/* Table */}
-        <Table
-          columns={programColumns}
-          data={programData}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className="table-wrapper">
+          {loading && (
+            <div className="loading-overlay">
+              Loading...
+            </div>
+          )}
+          <Table
+            columns={programColumns}
+            data={programData}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
 
         {/* Pagination */}
         <div className="pagination">

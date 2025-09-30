@@ -233,12 +233,19 @@ export default function Students() {
         </div>
 
         {/* Table */}
-        <Table
-          columns={studentColumns}
-          data={studentData}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className="table-wrapper">
+          {loading && (
+            <div className="loading-overlay">
+              Loading...
+            </div>
+          )}
+          <Table
+            columns={studentColumns}
+            data={studentData}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
 
         {/* Pagination */}
         <div className="pagination">
