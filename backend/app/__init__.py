@@ -1,7 +1,14 @@
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from app.config import Config
+from flask_jwt_extended import JWTManager
+from authlib.integrations.flask_client import OAuth
+from app.db import init_app as init_db
 import os
+
+# Initialize extensions
+jwt = JWTManager()
+oauth = OAuth()
 
 def create_app():
   # Define the static folder for the React production build
@@ -12,6 +19,18 @@ def create_app():
   app = Flask(__name__, static_folder=static_folder, static_url_path='')
   app.config.from_object(Config)
   
+  # Initialize Database Teardown
+  init_db(app)
+  
+  # Initialize Auth Extensions
+  jwt.init_app(app)
+  oauth.init_app(app)
+  oauth.register(
+      name='google',
+      server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+      client_kwargs={'scope': 'openid email profile'}
+  )
+
   # Enable CORS for API routes only
   CORS(app, resources={r"/api/*": {"origins": "*"}})
   
@@ -19,10 +38,12 @@ def create_app():
   from app.routes.colleges import colleges_bp
   from app.routes.programs import programs_bp
   from app.routes.students import students_bp
+  from app.routes.auth import auth_bp
   
   app.register_blueprint(colleges_bp, url_prefix='/api/colleges')
   app.register_blueprint(programs_bp, url_prefix='/api/programs')
   app.register_blueprint(students_bp, url_prefix='/api/students')
+  app.register_blueprint(auth_bp, url_prefix='/api/auth')
   
   @app.route('/api/health', methods=['GET'])
   def health():

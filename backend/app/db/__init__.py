@@ -9,7 +9,8 @@ def get_db_connection():
   port=Config.DB_PORT,
   database=Config.DB_NAME,
   user=Config.DB_USER,
-  password=Config.DB_PASSWORD
+  password=Config.DB_PASSWORD,
+  sslmode='require'
   )
   return conn
 
