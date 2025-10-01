@@ -164,14 +164,16 @@ export default function Colleges() {
 
         {/* Search and Sort */}
         <div className="search-sort">
-          <input
-            type="text"
-            placeholder="Search colleges"
-            className="search-bar"
-            value={search}
-            onChange={handleSearchChange}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
-          />
+          <div className="search-wrapper">
+            <input
+              type="text"
+              placeholder="Search colleges"
+              value={search}
+              onChange={handleSearchChange}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
+            />
+            <span className="results-info">{totalCount} Results</span>
+          </div>
           <div className="right-side">
             <div className="per-page">
               <p> Show </p>
@@ -204,9 +206,6 @@ export default function Colleges() {
 
         {/* Pagination */}
         <div className="pagination">
-          <div className="results-info">
-            Showing {startIndex} to {endIndex} of {totalCount} results
-          </div>
           <div className="navigation">
             <button className="btn" disabled={currentPage === 1} onClick={handlePrevPage}>Prev</button>
             <span className="page-number">Page {currentPage} of {totalPages}</span>
