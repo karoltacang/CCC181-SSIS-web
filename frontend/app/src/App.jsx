@@ -37,7 +37,6 @@ function App() {
             <Route path="/students" element={<Students />} />
             <Route path="/programs" element={<Programs />} />
             <Route path="/colleges" element={<Colleges />} />
-            <Route path="/settings" element={<h1> Settings </h1>} />
           </Routes>
         </div>
       </div>

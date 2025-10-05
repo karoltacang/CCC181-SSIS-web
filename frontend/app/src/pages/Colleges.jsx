@@ -21,6 +21,16 @@ export default function Colleges() {
   const [goToPage, setGoToPage] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
 
+  const clearCollegeCache = () => {
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('colleges_')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    // Also clear the list used by Programs page
+    sessionStorage.removeItem('colleges_list');
+  };
+
   useEffect(() => {
     fetchColleges(); // Fetch all colleges on initial render
   }, [currentPage, perPage]);
@@ -46,24 +56,38 @@ export default function Colleges() {
   const fetchColleges = async (searchTerm = search.trim(), background = false) => {
     try {
       if (!background) setLoading(true);
-      const params = {
-        page: currentPage,
-        per_page: perPage
+      
+      const cacheKey = `colleges_${currentPage}_${perPage}_${searchTerm}`;
+      let data, total;
+
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached && !background) {
+        const parsed = JSON.parse(cached);
+        data = parsed.data;
+        total = parsed.total;
+      } else {
+        const params = {
+          page: currentPage,
+          per_page: perPage
+        }
+  
+        if (searchTerm) {
+          params.search = searchTerm
+        }
+  
+        const response = await collegesAPI.getAll(params);
+        data = response.data.data;
+        total = response.data.total;
+        sessionStorage.setItem(cacheKey, JSON.stringify({ data, total }));
       }
 
-      if (searchTerm) {
-        params.search = searchTerm
-      }
-
-      const response = await collegesAPI.getAll(params);
-
-      const formattedData = response.data.data.map(college => ({
+      const formattedData = data.map(college => ({
         code: college.college_code,
         name: college.college_name
       }));
 
       setCollegeData(formattedData);
-      setTotalCount(response.data.total);
+      setTotalCount(total);
       setError(null);
     } catch (err) {
       console.error('Error fetching colleges:', err);
@@ -79,6 +103,7 @@ export default function Colleges() {
 
   const handleEditSuccess = () => {
     setEditItem(null);
+    clearCollegeCache();
     fetchColleges(undefined, true);
   };
 
@@ -89,6 +114,7 @@ export default function Colleges() {
   const handleDeleteConfirm = async () => {
     try {
       await collegesAPI.delete(deleteItem.code);
+      clearCollegeCache();
       setDeleteItem(null);
       fetchColleges(undefined, true);
     } catch (err) {
@@ -214,7 +240,7 @@ export default function Colleges() {
         <AddCollegeModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={() => fetchColleges(undefined, true)}
+          onSuccess={() => { clearCollegeCache(); fetchColleges(undefined, true); }}
         />
       )}
     </>

@@ -22,15 +22,32 @@ export default function Programs() {
   const [collegesList, setCollegesList] = useState([]);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
+  const clearProgramCache = () => {
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('programs_')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    // Also clear the list used by Students page
+    sessionStorage.removeItem('programs_list');
+  };
+
   useEffect(() => {
     fetchPrograms(); // Fetch programs on initial render
   }, [currentPage, perPage]);
 
   useEffect(() => {
     const fetchCollegesList = async () => {
+      const cached = sessionStorage.getItem('colleges_list');
+      if (cached) {
+        setCollegesList(JSON.parse(cached));
+        return;
+      }
       try {
         const response = await collegesAPI.getAll({ per_page: 1000, only_codes: true });
-        setCollegesList(response.data.data || []);
+        const data = response.data.data || [];
+        setCollegesList(data);
+        sessionStorage.setItem('colleges_list', JSON.stringify(data));
       } catch (err) {
         console.error("Failed to pre-fetch colleges:", err);
       }
@@ -59,26 +76,39 @@ export default function Programs() {
   const fetchPrograms = async (searchTerm = search.trim(), background = false) => {
     try {
       if (!background) setLoading(true);
-      const params = {
-        page: currentPage,
-        per_page: perPage,
+      
+      const cacheKey = `programs_${currentPage}_${perPage}_${searchTerm}`;
+      let data, total;
+
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached && !background) {
+        const parsed = JSON.parse(cached);
+        data = parsed.data;
+        total = parsed.total;
+      } else {
+        const params = {
+          page: currentPage,
+          per_page: perPage,
+        }
+  
+        if (searchTerm) {
+          params.search = searchTerm;
+        }
+  
+        const response = await programsAPI.getAll(params);
+        data = response.data.data;
+        total = response.data.total;
+        sessionStorage.setItem(cacheKey, JSON.stringify({ data, total }));
       }
 
-      if (searchTerm) {
-        params.search = searchTerm;
-      }
-
-      const response = await programsAPI.getAll(params);
-
-      const formattedData = response.data.data.map(program => ({
+      const formattedData = data.map(program => ({
         code: program.program_code,
         name: program.program_name,
         college: program.college_code
       }));
 
-      console.log(formattedData);
       setProgramData(formattedData);
-      setTotalCount(response.data.total);
+      setTotalCount(total);
       setError(null);
     } catch (err) {
       console.error('Error fetching programs:', err);
@@ -94,6 +124,7 @@ export default function Programs() {
 
   const handleEditSuccess = () => {
     setEditItem(null);
+    clearProgramCache();
     fetchPrograms(undefined, true);
   };
 
@@ -104,6 +135,7 @@ export default function Programs() {
   const handleDeleteConfirm = async () => {
     try {
       await programsAPI.delete(deleteItem.code);
+      clearProgramCache();
       setDeleteItem(null);
       fetchPrograms(undefined, true);
     } catch (err) {
@@ -223,7 +255,7 @@ export default function Programs() {
         <AddProgramModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={() => fetchPrograms(undefined, true)}
+          onSuccess={() => { clearProgramCache(); fetchPrograms(undefined, true); }}
           colleges={collegesList}
         />
       )}

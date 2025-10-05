@@ -25,15 +25,30 @@ export default function Students() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadItem, setUploadItem] = useState(null);
 
+  const clearStudentCache = () => {
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('students_')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
+
   useEffect(() => {
     fetchStudents(); // Fetch all students on initial render
   }, [currentPage, perPage]);
 
   useEffect(() => {
     const fetchProgramsList = async () => {
+      const cached = sessionStorage.getItem('programs_list');
+      if (cached) {
+        setProgramsList(JSON.parse(cached));
+        return;
+      }
       try {
         const response = await programsAPI.getAll({ per_page: 1000, only_codes: true });
-        setProgramsList(response.data.data || []);
+        const data = response.data.data || [];
+        setProgramsList(data);
+        sessionStorage.setItem('programs_list', JSON.stringify(data));
       } catch (err) {
         console.error("Failed to pre-fetch programs:", err);
       }
@@ -62,19 +77,32 @@ export default function Students() {
   const fetchStudents = async (searchTerm = search.trim(), background = false) => {
     try {
       if (!background) setLoading(true);
-      const params = {
-        page: currentPage,
-        per_page: perPage,
+      
+      const cacheKey = `students_${currentPage}_${perPage}_${searchTerm}`;
+      let data, total;
+
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached && !background) {
+        const parsed = JSON.parse(cached);
+        data = parsed.data;
+        total = parsed.total;
+      } else {
+        const params = {
+          page: currentPage,
+          per_page: perPage,
+        }
+  
+        if (searchTerm) {
+          params.search = searchTerm;
+        }
+  
+        const response = await studentsAPI.getAll(params);
+        data = response.data.data;
+        total = response.data.total;
+        sessionStorage.setItem(cacheKey, JSON.stringify({ data, total }));
       }
 
-      if (searchTerm) {
-        params.search = searchTerm;
-      }
-
-      const response = await studentsAPI.getAll(params);
-
-      console.log("RESPONSE DATA:", response.data);
-      const formattedData = response.data.data.map(student => ({
+      const formattedData = data.map(student => ({
         photo: (
           <div 
             className="student-photo-cell" 
@@ -97,7 +125,7 @@ export default function Students() {
       }));
 
       setStudentData(formattedData);
-      setTotalCount(response.data.total);
+      setTotalCount(total);
       setError(null);
     } catch (err) {
       console.error('Error fetching students:', err);
@@ -113,6 +141,7 @@ export default function Students() {
 
   const handleEditSuccess = () => {
     setEditItem(null);
+    clearStudentCache();
     fetchStudents(undefined, true);
   }
 
@@ -123,6 +152,7 @@ export default function Students() {
   const handleDeleteConfirm = async () => {
     try {
       await studentsAPI.delete(deleteItem.id);
+      clearStudentCache();
       setDeleteItem(null);
       fetchStudents(undefined, true);
     } catch (err) {
@@ -247,7 +277,7 @@ export default function Students() {
         <AddStudentModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={() => fetchStudents(undefined, true)}
+          onSuccess={() => { clearStudentCache(); fetchStudents(undefined, true); }}
           programs={programsList}
         />
       )}
@@ -257,7 +287,7 @@ export default function Students() {
           isOpen={uploadModalOpen}
           student={uploadItem}
           onClose={() => setUploadModalOpen(false)}
-          onSuccess={() => fetchStudents(undefined, true)}
+          onSuccess={() => { clearStudentCache(); fetchStudents(undefined, true); }}
         />
       )}
     </>

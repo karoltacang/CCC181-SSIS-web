@@ -32,6 +32,7 @@ const Login = () => {
       if (response.ok) {
         if (isLogin) {
           // Login Success
+          sessionStorage.clear();
           localStorage.setItem('token', data.access_token);
           if (data.user) {
               localStorage.setItem('user', JSON.stringify(data.user));
