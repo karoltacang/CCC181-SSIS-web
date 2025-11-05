@@ -11,6 +11,8 @@ python-dotenv = "*"
 authlib = "*"
 requests = "*"
 flask-jwt-extended = "*"
+supabase = "*"
+"app.services" = "*"
 
 [dev-packages]
 

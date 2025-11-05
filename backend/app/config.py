@@ -13,3 +13,5 @@ class Config:
   JWT_SECRET_KEY = getenv('JWT_SECRET_KEY', 'your-secret-key')
   GOOGLE_CLIENT_ID = getenv('GOOGLE_CLIENT_ID')
   GOOGLE_CLIENT_SECRET = getenv('GOOGLE_CLIENT_SECRET')
+  SUPABASE_URL = getenv('SUPABASE_URL')
+  SUPABASE_KEY = getenv('SUPABASE_KEY')

@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { studentsAPI, programsAPI } from "../services/api";
 import EditStudentModal from "../components/student/Edit";
 import AddStudentModal from "../components/student/Add";
+import UploadPhotoModal from "../components/student/UploadPhoto";
 import DeleteModal from "../components/global/Delete";
 import Table from "../components/global/Table";
 import "../App.css";
 
-const studentColumns = ["ID", "First Name", "Last Name", "Program", "Year", "Gender"];
+const studentColumns = ["Photo", "ID", "First Name", "Last Name", "Program", "Year", "Gender"];
 
 export default function Students() {
   const [studentData, setStudentData] = useState([]);
@@ -21,6 +22,8 @@ export default function Students() {
   const [goToPage, setGoToPage] = useState("");
   const [programsList, setProgramsList] = useState([]);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadItem, setUploadItem] = useState(null);
 
   useEffect(() => {
     fetchStudents(); // Fetch all students on initial render
@@ -72,6 +75,19 @@ export default function Students() {
 
       console.log("RESPONSE DATA:", response.data);
       const formattedData = response.data.data.map(student => ({
+        photo: (
+          <div 
+            className="student-photo-cell" 
+            onClick={() => handleUploadClick({ id: student.student_id, firstname: student.first_name })}
+            style={{ cursor: 'pointer', width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            {student.photo_url ? (
+              <img src={student.photo_url} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <span style={{ fontSize: '0.7rem', color: '#888' }}>Add</span>
+            )}
+          </div>
+        ),
         id: student.student_id,
         firstname: student.first_name,
         lastname: student.last_name,
@@ -113,6 +129,11 @@ export default function Students() {
       console.error("Error deleting student:", err);
       setError("Failed to delete student");
     }
+  };
+
+  const handleUploadClick = (student) => {
+    setUploadItem(student);
+    setUploadModalOpen(true);
   };
 
   // Pagination Logic
@@ -228,6 +249,15 @@ export default function Students() {
           onClose={() => setAddModalOpen(false)}
           onSuccess={() => fetchStudents(undefined, true)}
           programs={programsList}
+        />
+      )}
+
+      {uploadModalOpen && uploadItem && (
+        <UploadPhotoModal
+          isOpen={uploadModalOpen}
+          student={uploadItem}
+          onClose={() => setUploadModalOpen(false)}
+          onSuccess={() => fetchStudents(undefined, true)}
         />
       )}
     </>

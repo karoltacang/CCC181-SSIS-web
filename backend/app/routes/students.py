@@ -90,3 +90,28 @@ def delete_student(id):
     return jsonify({'error': 'Failed to delete student or student not found'}), 404
   except Exception as e:
     return jsonify({'error': str(e)}), 500
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@students_bp.route('/<id>/photo', methods=['POST'])
+def upload_photo(id):
+  if 'file' not in request.files:
+    return jsonify({'error': 'No file part'}), 400
+  
+  file = request.files['file']
+  
+  if file.filename == '':
+    return jsonify({'error': 'No selected file'}), 400
+      
+  if file and allowed_file(file.filename):
+    success, message, photo_url = Student.upload_photo(id, file)
+    
+    if success:
+        return jsonify({'message': message, 'photo_url': photo_url})
+    else:
+        return jsonify({'error': message}), 500
+          
+  return jsonify({'error': 'File type not allowed'}), 400
