@@ -14,9 +14,6 @@ export default function Sidebar() {
         <li>
           <Link to="/colleges">Colleges</Link>
         </li>
-        <li>
-          <Link to="/settings">Settings</Link>
-        </li>
       </ul>
     </div>
   );
