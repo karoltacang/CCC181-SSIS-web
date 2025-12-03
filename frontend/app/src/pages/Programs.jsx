@@ -193,7 +193,7 @@ export default function Programs() {
               onChange={handleSearchChange}
               onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
             />
-            <span className="results-info">{totalCount} Results</span>
+            <span className="results-info">Showing {startIndex} to {endIndex} of {totalCount} results</span>
           </div>
           <div className="right-side">
             <div className="per-page">
@@ -211,7 +211,7 @@ export default function Programs() {
         </div>
 
         {/* Table */}
-        <div className="table-wrapper">
+        <div className="table-wrapper programs-table">
           {loading && (
             <div className="loading-overlay">
               Loading...

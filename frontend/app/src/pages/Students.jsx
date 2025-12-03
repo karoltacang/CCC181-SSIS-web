@@ -233,7 +233,7 @@ export default function Students() {
         </div>
 
         {/* Table */}
-        <div className="table-wrapper">
+        <div className="table-wrapper students-table">
           {loading && (
             <div className="loading-overlay">
               Loading...

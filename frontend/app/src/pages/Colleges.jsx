@@ -172,7 +172,7 @@ export default function Colleges() {
               onChange={handleSearchChange}
               onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
             />
-            <span className="results-info">{totalCount} Results</span>
+            <span className="results-info">Showing {startIndex} to {endIndex} of {totalCount} results</span>
           </div>
           <div className="right-side">
             <div className="per-page">
@@ -190,7 +190,7 @@ export default function Colleges() {
         </div>
 
         {/* Table */}
-        <div className="table-wrapper">
+        <div className="table-wrapper colleges-table">
           {loading && (
             <div className="loading-overlay">
               Loading...

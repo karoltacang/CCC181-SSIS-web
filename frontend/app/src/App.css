@@ -247,6 +247,29 @@ body {
   text-align: center;
 }
 
+.students-table .data-table {
+  table-layout: fixed;
+}
+
+.students-table .data-table th:nth-child(1) { width: 60px; } /* Photo */
+.students-table .data-table th:nth-child(2) { width: 120px; } /* ID */
+.students-table .data-table th:nth-child(5) { width: 100px; } /* Program */
+.students-table .data-table th:nth-child(6) { width: 80px; } /* Year */
+.students-table .data-table th:nth-child(7) { width: 80px; } /* Gender */
+
+.colleges-table .data-table {
+  table-layout: fixed;
+}
+
+.colleges-table .data-table th:nth-child(1) { width: 150px; } /* Code */
+
+.programs-table .data-table {
+  table-layout: fixed;
+}
+
+.programs-table .data-table th:nth-child(1) { width: 150px; } /* Code */
+.programs-table .data-table th:nth-child(3) { width: 150px; } /* College */
+
 thead th {
   padding: 12px 16px;
   background: var(--primary-color);
