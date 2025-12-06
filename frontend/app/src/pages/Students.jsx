@@ -230,14 +230,10 @@ export default function Students() {
         {/* Header */}
         <div className="header-row">
           <h1 className="title">Students</h1>
-          <div className="action-buttons">
-            <button className="btn btn-outline">Export</button>
-            <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new student</button>
-          </div>
         </div>
 
-        {/* Search and Sort */}
-        <div className="search-sort">
+        {/* Functions */}
+        <div className="functions">
           <div className="search-wrapper">
             <input
               type="text"
@@ -249,6 +245,10 @@ export default function Students() {
             <span className="results-info">{totalCount} Results</span>
           </div>
           <div className="right-side">
+            <div className="action-buttons">
+              <button className="btn btn-outline">Export</button>
+              <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new student</button>
+            </div>
             <div className="per-page">
               <p> Show </p>
               <select value={perPage} onChange={(e) => handlePerPageChange(Number(e.target.value))}>

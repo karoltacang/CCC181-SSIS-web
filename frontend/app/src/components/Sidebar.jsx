@@ -17,15 +17,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Menu */}
-      <nav className="sidebar-nav">
-        <NavLink 
-          to="/settings" 
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-        >
-          <span className="nav-icon"> </span>
-          <span className="nav-label">Dashboard</span>
-        </NavLink>
-        
+      <nav className="sidebar-nav">        
         <NavLink 
           to="/students" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
