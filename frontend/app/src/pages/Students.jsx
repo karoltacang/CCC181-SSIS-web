@@ -246,7 +246,6 @@ export default function Students() {
           </div>
           <div className="right-side">
             <div className="action-buttons">
-              <button className="btn btn-outline">Export</button>
               <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new student</button>
             </div>
             <div className="per-page">

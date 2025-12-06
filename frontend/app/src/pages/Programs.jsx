@@ -213,7 +213,6 @@ export default function Programs() {
           </div>
           <div className="right-side">
             <div className="action-buttons">
-              <button className="btn btn-outline">Export</button>
               <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new program</button>
             </div>
             <div className="per-page">
