@@ -5,83 +5,38 @@ programs_bp = Blueprint('programs', __name__)
 
 @programs_bp.route('', methods=['GET'])
 def get_programs():
-  """Get all programs with pagination, optionally filtered by college_code or search."""
-  try:
-    # Pagination params
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
-    college_code = request.args.get('college_code')
-    search = request.args.get('search')
-    only_codes = request.args.get('only_codes') == 'true'
-
-    # Get paginated results
-    result = Program.get_all(
-      page=page,
-      per_page=per_page,
-      college_code=college_code,
-      search_term=search,
-      only_codes=only_codes
-    )
-     
-    return jsonify(result), 200
-  except Exception as e:
-    return jsonify({'error': str(e)}), 500
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+        search = request.args.get('search')
+        only_codes = request.args.get('only_codes') == 'true'
+        sort_by = request.args.get('sort_by', 'program_code')
+        order = request.args.get('order', 'asc')
+        
+        result = Program.get_all(page, per_page, search, only_codes=only_codes, sort_by=sort_by, order=order)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @programs_bp.route('', methods=['POST'])
 def create_program():
-  """Create a new program."""
-  try:
-    data = request.get_json()
-    required_fields = ['program_code', 'program_name', 'college_code']
-    if not data or not all(field in data for field in required_fields):
-      return jsonify({'error': 'program_code, program_name, and college_code are required'}), 400
+    data = request.json
+    if not data or 'code' not in data or 'name' not in data or 'college' not in data:
+        return jsonify({'error': 'Missing required fields'}), 400
     
-    if Program.create(
-      program_code=data['program_code'],
-      program_name=data['program_name'],
-      college_code=data['college_code']
-    ):
-      return jsonify(data), 201
+    if Program.create(data['code'], data['name'], data['college']):
+        return jsonify({'message': 'Program created'}), 201
     return jsonify({'error': 'Failed to create program'}), 400
-  except Exception as e:
-    return jsonify({'error': str(e)}), 500
-
-@programs_bp.route('/<code>', methods=['GET'])
-def get_program(code):
-  """Get a specific program by code."""
-  try:
-    program = Program.get_by_code(code)
-    if not program:
-      return jsonify({'error': 'Program not found'}), 404
-    return jsonify(program), 200
-  except Exception as e:
-    return jsonify({'error': str(e)}), 500
 
 @programs_bp.route('/<code>', methods=['PUT'])
 def update_program(code):
-  """Update a specific program by code."""
-  try:
-    data = request.get_json()
-    if not data:
-      return jsonify({'error': 'Request body is empty'}), 400
-    
-    if Program.update(
-      program_code=code,
-      program_name=data.get('program_name'),
-      college_code=data.get('college_code')
-    ):
-      updated_program = Program.get_by_code(code)
-      return jsonify(updated_program), 200
-    return jsonify({'error': 'Failed to update program or program not found'}), 404
-  except Exception as e:
-    return jsonify({'error': str(e)}), 500
+    data = request.json
+    if Program.update(code, data.get('name'), data.get('college')):
+        return jsonify({'message': 'Program updated'}), 200
+    return jsonify({'error': 'Failed to update program'}), 404
 
 @programs_bp.route('/<code>', methods=['DELETE'])
 def delete_program(code):
-  """Delete a specific program by code."""
-  try:
     if Program.delete(code):
-      return jsonify({'message': 'Program deleted successfully'}), 200
-    return jsonify({'error': 'Failed to delete program or program not found'}), 404
-  except Exception as e:
-    return jsonify({'error': str(e)}), 500
+        return jsonify({'message': 'Program deleted'}), 200
+    return jsonify({'error': 'Failed to delete program'}), 404

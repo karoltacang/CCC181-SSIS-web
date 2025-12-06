@@ -6,7 +6,10 @@ import Table from "../components/global/Table";
 import { collegesAPI } from "../services/api";
 import "../App.css";
 
-const collegeColumns = ["Code", "Name"];
+const collegeColumns = [
+  { label: "Code", key: "code", sortable: true },
+  { label: "Name", key: "name", sortable: true }
+];
 
 export default function Colleges() {
   const [collegeData, setCollegeData] = useState([]);
@@ -20,6 +23,7 @@ export default function Colleges() {
   const [deleteItem, setDeleteItem] = useState(null);
   const [goToPage, setGoToPage] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
 
   const clearCollegeCache = () => {
     Object.keys(sessionStorage).forEach(key => {
@@ -53,11 +57,24 @@ export default function Colleges() {
     setCurrentPage(1);
   };
 
-  const fetchColleges = async (searchTerm = search.trim(), background = false) => {
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    
+    setSortConfig({ key, direction });
+    fetchColleges(search.trim(), false, key, direction);
+  };
+
+  const fetchColleges = async (searchTerm = search.trim(), background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
     try {
       if (!background) setLoading(true);
       
-      const cacheKey = `colleges_${currentPage}_${perPage}_${searchTerm}`;
+      const keyMap = { 'code': 'college_code', 'name': 'college_name' };
+      const backendSortBy = keyMap[sortBy] || sortBy;
+
+      const cacheKey = `colleges_${currentPage}_${perPage}_${searchTerm}_${backendSortBy}_${order}`;
       let data, total;
 
       const cached = sessionStorage.getItem(cacheKey);
@@ -74,6 +91,8 @@ export default function Colleges() {
         if (searchTerm) {
           params.search = searchTerm
         }
+        params.sort_by = backendSortBy;
+        params.order = order;
   
         const response = await collegesAPI.getAll(params);
         data = response.data.data;
@@ -185,7 +204,6 @@ export default function Colleges() {
               </select>
               <p> per page </p>
             </div>
-            <button className="btn btn-outline sort-btn">Sort</button>
           </div>
         </div>
 
@@ -199,6 +217,8 @@ export default function Colleges() {
           <Table
             columns={collegeColumns}
             data={collegeData}
+            onSort={handleSort}
+            sortConfig={sortConfig}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

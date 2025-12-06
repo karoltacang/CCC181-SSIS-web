@@ -1,137 +1,94 @@
-from app.db import get_db_connection
+from app.db import get_db
 
 class Program:
-    @staticmethod
-    def get_all(page=1, per_page=10, search_term=None, college_code=None, only_codes=False):
-      conn = get_db_connection()
-      cur = conn.cursor()
+  @staticmethod
+  def get_all(page=1, per_page=10, search_term=None, only_codes=False, sort_by='program_code', order='asc'):
+    conn = get_db()
+    cur = conn.cursor()
 
-      # Base query
-      columns = "program_code" if only_codes else "program_code, program_name, college_code"
-      query = f'''
-          SELECT {columns}
-          FROM program
-      '''
-      count_query = 'SELECT COUNT(*) FROM program'
-      
-      conditions = []
-      params = []
+    if only_codes:
+        cur.execute('SELECT program_code FROM program')
+        results = [row[0] for row in cur.fetchall()]
+        cur.close()
+        return {'data': results}
 
-      # Filters
-      if search_term:
-          conditions.append('''
-              (program_code ILIKE %s OR program_name ILIKE %s)
-          ''')
-          like_term = f'%{search_term}%'
-          params.extend([like_term] * 2)
-      
-      if college_code:
-          conditions.append('college_code = %s')
-          params.append(college_code)
+    query = 'SELECT program_code, program_name, college_code FROM program'
+    count_query = 'SELECT COUNT(*) FROM program'
+    
+    params = []
+    if search_term:
+      where_clause = ' WHERE program_code ILIKE %s OR program_name ILIKE %s OR college_code ILIKE %s'
+      query += where_clause
+      count_query += where_clause
+      term = f'%{search_term}%'
+      params.extend([term, term, term])
+    
+    cur.execute(count_query, params)
+    total_count = cur.fetchone()[0]
 
-      # WHERE clause (for filters)
-      if conditions:
-          where_clause = ' WHERE ' + ' AND '.join(conditions)
-          query += where_clause
-          count_query += where_clause
-      
-      # Get total count
-      cur.execute(count_query, params)
-      total_count = cur.fetchone()[0]
+    # Sorting
+    valid_sort_columns = {'program_code', 'program_name', 'college_code'}
+    if sort_by not in valid_sort_columns:
+        sort_by = 'program_code'
+    
+    sort_order = 'DESC' if order.lower() == 'desc' else 'ASC'
+    query += f' ORDER BY {sort_by} {sort_order} LIMIT %s OFFSET %s'
 
-      # Pagination
-      query += ' ORDER BY program_code LIMIT %s OFFSET %s'
-      offset = (page - 1) * per_page
-      params.extend([per_page, offset])
-      
-      # Execute query
-      cur.execute(query, params)
-      columns = [desc[0] for desc in cur.description]
-      results = [dict(zip(columns, row)) for row in cur.fetchall()]
-      
+    offset = (page - 1) * per_page
+    params.extend([per_page, offset])
+    
+    cur.execute(query, params)
+    columns = [desc[0] for desc in cur.description]
+    results = [dict(zip(columns, row)) for row in cur.fetchall()]
+    
+    cur.close()
+    
+    return {
+      'data': results,
+      'total': total_count,
+      'page': page,
+      'per_page': per_page,
+      'total_pages': (total_count + per_page - 1) // per_page
+    }
+
+  @staticmethod
+  def create(code, name, college_code):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+      cur.execute('INSERT INTO program (program_code, program_name, college_code) VALUES (%s, %s, %s)', (code, name, college_code))
+      conn.commit()
+      return True
+    except Exception:
+      conn.rollback()
+      return False
+    finally:
       cur.close()
-      conn.close()
-      
-      return {
-          'data': results,
-          'total': total_count,
-          'page': page,
-          'per_page': per_page,
-          'total_pages': (total_count + per_page - 1) // per_page
-      }
 
-    @staticmethod
-    def create(program_code, program_name, college_code):
-      conn = get_db_connection()
-      cur = conn.cursor()
-      try:
-        cur.execute(
-          'INSERT INTO program (program_code, program_name, college_code) VALUES (%s, %s, %s)',
-          (program_code, program_name, college_code)
-        )
-        conn.commit()
-        return True
-      except Exception as e:
-        conn.rollback()
-        raise e
-      finally:
-        cur.close()
-        conn.close()
-    
-    @staticmethod
-    def get_by_code(program_code):
-      conn = get_db_connection()
-      cur = conn.cursor()
-      try:
-        cur.execute(
-          'SELECT program_code, program_name, college_code FROM program WHERE program_code = %s',
-          (program_code,)
-        )
-        row = cur.fetchone()
-        if row:
-          return {
-            'program_code': row[0],
-            'program_name': row[1],
-            'college_code': row[2]
-          }
-        return None
-      except Exception as e:
-        raise e
-      finally:
-        cur.close()
-        conn.close()
-    
-    @staticmethod
-    def update(program_code, program_name, college_code):
-      conn = get_db_connection()
-      cur = conn.cursor()
-      try:
-        cur.execute(
-          'UPDATE program SET program_name = %s, college_code = %s WHERE program_code = %s',
-          (program_name, college_code, program_code)
-        )
-        affected = cur.rowcount
-        conn.commit()
-        return affected > 0
-      except Exception as e:
-        conn.rollback()
-        raise e
-      finally:
-        cur.close()
-        conn.close()
-    
-    @staticmethod
-    def delete(program_code):
-      conn = get_db_connection()
-      cur = conn.cursor()
-      try:
-        cur.execute('DELETE FROM program WHERE program_code = %s', (program_code,))
-        affected = cur.rowcount
-        conn.commit()
-        return affected > 0
-      except Exception as e:
-        conn.rollback()
-        raise e
-      finally:
-        cur.close()
-        conn.close()
+  @staticmethod
+  def update(code, name, college_code):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+      cur.execute('UPDATE program SET program_name = %s, college_code = %s WHERE program_code = %s', (name, college_code, code))
+      conn.commit()
+      return cur.rowcount > 0
+    except Exception:
+      conn.rollback()
+      return False
+    finally:
+      cur.close()
+
+  @staticmethod
+  def delete(code):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+      cur.execute('DELETE FROM program WHERE program_code = %s', (code,))
+      conn.commit()
+      return cur.rowcount > 0
+    except Exception:
+      conn.rollback()
+      return False
+    finally:
+      cur.close()

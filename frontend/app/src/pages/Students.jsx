@@ -7,7 +7,15 @@ import DeleteModal from "../components/global/Delete";
 import Table from "../components/global/Table";
 import "../App.css";
 
-const studentColumns = ["Photo", "ID", "First Name", "Last Name", "Program", "Year", "Gender"];
+const studentColumns = [
+  { label: "Photo", key: "photo", sortable: false },
+  { label: "ID", key: "id", sortable: true },
+  { label: "First Name", key: "firstname", sortable: true },
+  { label: "Last Name", key: "lastname", sortable: true },
+  { label: "Program", key: "program", sortable: true },
+  { label: "Year", key: "year", sortable: true },
+  { label: "Gender", key: "gender", sortable: true }
+];
 
 export default function Students() {
   const [studentData, setStudentData] = useState([]);
@@ -24,6 +32,7 @@ export default function Students() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadItem, setUploadItem] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
 
   const clearStudentCache = () => {
     Object.keys(sessionStorage).forEach(key => {
@@ -74,11 +83,31 @@ export default function Students() {
     setCurrentPage(1);
   };
 
-  const fetchStudents = async (searchTerm = search.trim(), background = false) => {
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    
+    setSortConfig({ key, direction });
+    fetchStudents(search.trim(), false, key, direction);
+  };
+
+  const fetchStudents = async (searchTerm = search.trim(), background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
     try {
       if (!background) setLoading(true);
       
-      const cacheKey = `students_${currentPage}_${perPage}_${searchTerm}`;
+    const keyMap = {
+      'id': 'student_id',
+      'firstname': 'first_name',
+      'lastname': 'last_name',
+      'program': 'program_code',
+      'year': 'year_level',
+      'gender': 'gender'
+    };
+    const backendSortBy = keyMap[sortBy] || sortBy;
+      
+      const cacheKey = `students_${currentPage}_${perPage}_${searchTerm}_${backendSortBy}_${order}`;
       let data, total;
 
       const cached = sessionStorage.getItem(cacheKey);
@@ -95,6 +124,8 @@ export default function Students() {
         if (searchTerm) {
           params.search = searchTerm;
         }
+        params.sort_by = backendSortBy;
+        params.order = order;
   
         const response = await studentsAPI.getAll(params);
         data = response.data.data;
@@ -228,7 +259,6 @@ export default function Students() {
               </select>
               <p> per page </p>
             </div>
-            <button className="btn btn-outline sort-btn">Sort</button>
           </div>
         </div>
 
@@ -242,6 +272,8 @@ export default function Students() {
           <Table
             columns={studentColumns}
             data={studentData}
+            onSort={handleSort}
+            sortConfig={sortConfig}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

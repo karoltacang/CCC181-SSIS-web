@@ -12,13 +12,19 @@ def get_students():
     per_page = int(request.args.get('per_page', 10))
     program_code = request.args.get('program_code')
     search = request.args.get('search')
+    sort_by = request.args.get('sort_by', 'student_id')
+    order = request.args.get('order', 'asc')
+    only_codes = request.args.get('only_codes') == 'true'
     
     # Get paginated results
     result = Student.get_all(
         page=page,
         per_page=per_page,
         search_term=search,
-        program_code=program_code
+        program_code=program_code,
+        sort_by=sort_by,
+        order=order,
+        only_codes=only_codes
     )
     
     return jsonify(result), 200

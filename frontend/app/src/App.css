@@ -205,7 +205,7 @@ body {
 }
 
 /* Global Table Styles */
-.table-container {
+.data-table-container {
   overflow-x: auto;
   margin-bottom: 1rem;
   position: relative;
@@ -214,7 +214,7 @@ body {
   background: white;
 }
 
-.table-container::after {
+.data-table-container::after {
   content: "↓";
   position: sticky;
   bottom: 0;
@@ -223,9 +223,9 @@ body {
   padding: 10px;
   font-size: 1.5rem;
   color: var(--primary-color);
-  pointer-events: auto;
+  pointer-events: none;
   cursor: pointer;
-  z-index: 10;
+  z-index: 1;
   margin-top: -50px;
 }
 
@@ -283,12 +283,36 @@ thead th {
   background-clip: padding-box;
 }
 
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable-header:hover {
+  background: var(--primary-hover);
+}
+
+.th-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sort-icon {
+  font-size: 0.8em;
+}
+
+.sort-icon.muted {
+  opacity: 0.3;
+}
+
 thead th:first-child {
-  border-top-left-radius: 0;
+  border-top-left-radius: 8px;
 }
 
 thead th:last-child {
-  border-top-right-radius: 0;
+  border-top-right-radius: 8px;
 }
 
 tbody td {
@@ -396,12 +420,6 @@ tbody tr:hover {
   gap: 20px;
 }
 
-.search-sort .sort-btn {
-  padding: 8px 12px;
-  font-size: 14px;
-  margin-left: auto;
-}
-
 .search-sort .per-page{
   display: flex;
   flex-direction: row;
@@ -446,7 +464,7 @@ tbody tr:hover {
 }
 
 @supports (animation-timeline: scroll(nearest)) {
-  .table-container::after {
+  .data-table-container::after {
     opacity: 0;
     visibility: hidden;
     animation-name: bounce, detect-scroll, hide-arrow;

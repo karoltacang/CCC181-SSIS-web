@@ -6,9 +6,15 @@ from supabase import create_client
 
 class Student:
   @staticmethod
-  def get_all(page=1, per_page=10, search_term=None, program_code=None):
+  def get_all(page=1, per_page=10, search_term=None, program_code=None, sort_by='student_id', order='asc', only_codes=False):
     conn = get_db()
     cur = conn.cursor()
+
+    if only_codes:
+        cur.execute('SELECT student_id FROM student')
+        results = [row[0] for row in cur.fetchall()]
+        cur.close()
+        return {'data': results}
 
     # Base query
     query = '''
@@ -44,7 +50,14 @@ class Student:
     total_count = cur.fetchone()[0]
 
     # Pagination
-    query += ' ORDER BY student_id LIMIT %s OFFSET %s'
+    # Whitelist sort columns to prevent SQL injection
+    valid_sort_columns = {'student_id', 'first_name', 'last_name', 'year_level', 'gender', 'program_code'}
+    if sort_by not in valid_sort_columns:
+        sort_by = 'student_id'
+    
+    sort_order = 'DESC' if order.lower() == 'desc' else 'ASC'
+    
+    query += f' ORDER BY {sort_by} {sort_order} LIMIT %s OFFSET %s'
     offset = (page - 1) * per_page
     params.extend([per_page, offset])
     

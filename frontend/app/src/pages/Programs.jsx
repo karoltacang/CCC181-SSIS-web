@@ -6,7 +6,11 @@ import Table from "../components/global/Table";
 import { programsAPI, collegesAPI } from "../services/api";
 import "../App.css";
 
-const programColumns = ["Code", "Name", "College"];
+const programColumns = [
+  { label: "Code", key: "code", sortable: true },
+  { label: "Name", key: "name", sortable: true },
+  { label: "College", key: "college", sortable: true }
+];
 
 export default function Programs() {
   const [programData, setProgramData] = useState([]);
@@ -21,6 +25,7 @@ export default function Programs() {
   const [goToPage, setGoToPage] = useState("");
   const [collegesList, setCollegesList] = useState([]);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: 'code', direction: 'asc' });
 
   const clearProgramCache = () => {
     Object.keys(sessionStorage).forEach(key => {
@@ -73,11 +78,24 @@ export default function Programs() {
     setCurrentPage(1);
   }
 
-  const fetchPrograms = async (searchTerm = search.trim(), background = false) => {
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    
+    setSortConfig({ key, direction });
+    fetchPrograms(search.trim(), false, key, direction);
+  };
+
+  const fetchPrograms = async (searchTerm = search.trim(), background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
     try {
       if (!background) setLoading(true);
       
-      const cacheKey = `programs_${currentPage}_${perPage}_${searchTerm}`;
+      const keyMap = { 'code': 'program_code', 'name': 'program_name', 'college': 'college_code' };
+      const backendSortBy = keyMap[sortBy] || sortBy;
+
+      const cacheKey = `programs_${currentPage}_${perPage}_${searchTerm}_${backendSortBy}_${order}`;
       let data, total;
 
       const cached = sessionStorage.getItem(cacheKey);
@@ -94,6 +112,8 @@ export default function Programs() {
         if (searchTerm) {
           params.search = searchTerm;
         }
+        params.sort_by = backendSortBy;
+        params.order = order;
   
         const response = await programsAPI.getAll(params);
         data = response.data.data;
@@ -206,7 +226,6 @@ export default function Programs() {
               </select>
               <p> per page </p>
             </div>
-            <button className="btn btn-outline sort-btn">Sort</button>
           </div>
         </div>
 
@@ -220,6 +239,8 @@ export default function Programs() {
           <Table
             columns={programColumns}
             data={programData}
+            onSort={handleSort}
+            sortConfig={sortConfig}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
