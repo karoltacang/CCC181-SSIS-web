@@ -355,7 +355,6 @@ tbody tr:hover {
   color: #2751A2;
 }
 
-/* Remove Scrollbar */
 /* width */
 ::-webkit-scrollbar {
     width: 15px;
@@ -377,14 +376,14 @@ tbody tr:hover {
     background: transparent;
 }
 
-/* Search and sort container */
+/* Functions */
 
 .functions {
   display: flex;
   align-items: center;
   gap: 20px;
   margin-bottom: 20px;
-  justify-content: space-between; /* left: search, right: controls */
+  justify-content: space-between;
 }
 
 .search-wrapper {
@@ -416,7 +415,6 @@ tbody tr:hover {
   margin-left: 12px;
 }
 
-/* Right side controls */
 .right-side {
   display: flex;
   align-items: center;
@@ -446,7 +444,6 @@ tbody tr:hover {
   color: var(--text-secondary);
 }
 
-/* select styling for per-page */
 .per-page select {
   border: 1px solid #d1d5db;
   background: white;
@@ -458,7 +455,6 @@ tbody tr:hover {
   min-width: 64px;
 }
 
-/* Student photo cell */
 .student-photo-cell {
   cursor: pointer;
   width: 40px;
@@ -486,13 +482,11 @@ tbody tr:hover {
   display: block;
 }
 
-/* Loading overlay tweak */
 .loading-overlay {
   font-weight: 600;
   color: var(--primary-color);
 }
 
-/* Responsive: stack controls on narrow screens */
 @media (max-width: 800px) {
   .functions {
     flex-direction: column;

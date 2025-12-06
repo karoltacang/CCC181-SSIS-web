@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/global/Sidebar";
 import Students from "./pages/Students";
 import Programs from "./pages/Programs";
 import Colleges from "./pages/Colleges";
