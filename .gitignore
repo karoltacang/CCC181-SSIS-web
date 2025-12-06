@@ -6,8 +6,7 @@ __pycache__/
 
 # Node
 node_modules/
-dist/
-/build
+static/
 frontend/node_modules/
 frontend/dist/
 

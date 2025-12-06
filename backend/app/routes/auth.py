@@ -114,8 +114,7 @@ def google_callback():
         
         # Redirect to the frontend with the token in the query string
         # The frontend should grab this token, save it, and redirect the user to the dashboard
-        frontend_url = current_app.config.get('FRONTEND_URL', 'http://localhost:5173')
-        return redirect(f'{frontend_url}/?token={access_token}')
+        return redirect(f'/?token={access_token}')
     except Exception as e:
         return jsonify({'error': 'Google login failed', 'details': str(e)}), 500
 
