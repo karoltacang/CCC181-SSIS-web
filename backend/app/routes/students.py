@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from app.models.student import Student
 
 students_bp = Blueprint('students', __name__)
 
 @students_bp.route('', methods=['GET'])
+@jwt_required()
 def get_students():
   """Get all students with pagination, optionally filtered by program_code or a search query."""
   try:
@@ -32,6 +34,7 @@ def get_students():
     return jsonify({'error': str(e)}), 500
 
 @students_bp.route('', methods=['POST'])
+@jwt_required()
 def create_student():
   """Create a new student."""
   try:
@@ -55,6 +58,7 @@ def create_student():
     return jsonify({'error': str(e)}), 500
 
 @students_bp.route('/<id>', methods=['GET'])
+@jwt_required()
 def get_student(id):
   """Get a specific student by ID."""
   try:
@@ -66,6 +70,7 @@ def get_student(id):
     return jsonify({'error': str(e)}), 500
 
 @students_bp.route('/<id>', methods=['PUT'])
+@jwt_required()
 def update_student(id):
   """Update a specific student by ID."""
   try:
@@ -88,6 +93,7 @@ def update_student(id):
     return jsonify({'error': str(e)}), 500
 
 @students_bp.route('/<id>', methods=['DELETE'])
+@jwt_required()
 def delete_student(id):
   """Delete a specific student by ID."""
   try:
@@ -103,6 +109,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @students_bp.route('/<id>/photo', methods=['POST'])
+@jwt_required()
 def upload_photo(id):
   if 'file' not in request.files:
     return jsonify({'error': 'No file part'}), 400

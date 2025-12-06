@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from app.models.college import College
 
 colleges_bp = Blueprint('colleges', __name__)
 
 @colleges_bp.route('', methods=['GET'])
+@jwt_required()
 def get_colleges():
     try:
         page = int(request.args.get('page', 1))
@@ -19,6 +21,7 @@ def get_colleges():
         return jsonify({'error': str(e)}), 500
 
 @colleges_bp.route('', methods=['POST'])
+@jwt_required()
 def create_college():
     data = request.json
     if not data or 'code' not in data or 'name' not in data:
@@ -29,6 +32,7 @@ def create_college():
     return jsonify({'error': 'Failed to create college'}), 400
 
 @colleges_bp.route('/<code>', methods=['PUT'])
+@jwt_required()
 def update_college(code):
     data = request.json
     if College.update(code, data.get('name')):
@@ -36,6 +40,7 @@ def update_college(code):
     return jsonify({'error': 'Failed to update college'}), 404
 
 @colleges_bp.route('/<code>', methods=['DELETE'])
+@jwt_required()
 def delete_college(code):
     if College.delete(code):
         return jsonify({'message': 'College deleted'}), 200

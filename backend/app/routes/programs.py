@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from app.models.program import Program
 
 programs_bp = Blueprint('programs', __name__)
 
 @programs_bp.route('', methods=['GET'])
+@jwt_required()
 def get_programs():
     try:
         page = int(request.args.get('page', 1))
@@ -19,6 +21,7 @@ def get_programs():
         return jsonify({'error': str(e)}), 500
 
 @programs_bp.route('', methods=['POST'])
+@jwt_required()
 def create_program():
     data = request.json
     if not data or 'code' not in data or 'name' not in data or 'college' not in data:
@@ -29,6 +32,7 @@ def create_program():
     return jsonify({'error': 'Failed to create program'}), 400
 
 @programs_bp.route('/<code>', methods=['PUT'])
+@jwt_required()
 def update_program(code):
     data = request.json
     if Program.update(code, data.get('name'), data.get('college')):
@@ -36,6 +40,7 @@ def update_program(code):
     return jsonify({'error': 'Failed to update program'}), 404
 
 @programs_bp.route('/<code>', methods=['DELETE'])
+@jwt_required()
 def delete_program(code):
     if Program.delete(code):
         return jsonify({'message': 'Program deleted'}), 200
