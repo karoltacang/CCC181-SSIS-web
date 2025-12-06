@@ -1,9 +1,15 @@
 from flask import Blueprint, request, jsonify, url_for, redirect, current_app
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from app.models.user import User
-from app import oauth
+from app.models.token import TokenBlocklist
+from app import oauth, jwt
 
 auth_bp = Blueprint('auth', __name__)
+
+@jwt.token_in_blocklist_loader
+def check_if_token_revoked(jwt_header, jwt_payload):
+    jti = jwt_payload["jti"]
+    return TokenBlocklist.is_revoked(jti)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -30,6 +36,14 @@ def login():
         })
     
     return jsonify({'error': 'Invalid username or password'}), 401
+
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    jti = get_jwt()['jti']
+    if TokenBlocklist.add(jti):
+        return jsonify({'message': 'Successfully logged out'}), 200
+    return jsonify({'error': 'Logout failed'}), 500
 
 @auth_bp.route('/register', methods=['POST'])
 def register():

@@ -12,7 +12,7 @@ authlib = "*"
 requests = "*"
 flask-jwt-extended = "*"
 supabase = "*"
-"app.services" = "*"
+flask-apscheduler = "*"
 
 [dev-packages]
 

@@ -1,5 +1,6 @@
 from os import getenv
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 
@@ -15,3 +16,4 @@ class Config:
   GOOGLE_CLIENT_SECRET = getenv('GOOGLE_CLIENT_SECRET')
   SUPABASE_URL = getenv('SUPABASE_URL')
   SUPABASE_KEY = getenv('SUPABASE_KEY')
+  JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)

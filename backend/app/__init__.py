@@ -4,6 +4,8 @@ from app.config import Config
 from flask_jwt_extended import JWTManager
 from authlib.integrations.flask_client import OAuth
 from app.db import init_app as init_db
+from app.models.token import TokenBlocklist
+from flask_apscheduler import APScheduler
 import os
 
 # Initialize extensions
@@ -11,6 +13,7 @@ jwt = JWTManager()
 oauth = OAuth()
 
 def create_app():
+  scheduler = APScheduler()
   # Define the static folder for the React production build
   project_root = os.path.dirname(os.path.dirname(__file__))
   static_folder = os.path.join(project_root, 'static')
@@ -21,6 +24,10 @@ def create_app():
   
   # Initialize Database Teardown
   init_db(app)
+
+  # Initialize Scheduler
+  scheduler.init_app(app)
+  scheduler.start()
   
   # Initialize Auth Extensions
   jwt.init_app(app)
@@ -60,5 +67,17 @@ def create_app():
     else:
       # For all other paths, serve the React app's entry point.
       return send_from_directory(app.static_folder, 'index.html')
+  
+  @app.cli.command('cleanup-tokens')
+  def cleanup_tokens():
+      """Deletes expired tokens from the blocklist."""
+      count = TokenBlocklist.cleanup()
+      print(f"Cleaned up {count} expired tokens.")
+
+  # Run cleanup every hour
+  @scheduler.task('interval', id='cleanup_tokens', hours=1)
+  def scheduled_cleanup():
+      with app.app_context():
+          TokenBlocklist.cleanup()
   
   return app
