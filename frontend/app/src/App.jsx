@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Sidebar from "./components/global/Sidebar";
 import Students from "./pages/Students";
@@ -6,6 +6,18 @@ import Programs from "./pages/Programs";
 import Colleges from "./pages/Colleges";
 import Login from "./pages/login/Login";
 import './App.css';
+
+// Protected Route wrapper component
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
+  const location = useLocation();
+  
+  if (!token) {
+    return <Login />;
+  }
+  
+  return children;
+}
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -20,26 +32,47 @@ function App() {
     }
   }, []);
 
-  if (!token) {
-    return <Login />;
-  }
-
   return (
     <Router>
-      <div className="app">
-        {/* Sidebar */}
-        <Sidebar />
+      {!token ? (
+        <Login />
+      ) : (
+        <div className="app">
+          {/* Sidebar */}
+          <Sidebar />
 
-        {/* Main Content */}
-        <div className="main">
-          <Routes>
-            <Route path="/" element={<Navigate to="/students" />} />
-            <Route path="/students" element={<Students />} />
-            <Route path="/programs" element={<Programs />} />
-            <Route path="/colleges" element={<Colleges />} />
-          </Routes>
+          {/* Main Content */}
+          <div className="main">
+            <Routes>
+              <Route path="/" element={<Navigate to="/students" replace />} />
+              <Route 
+                path="/students" 
+                element={
+                  <ProtectedRoute>
+                    <Students />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/programs" 
+                element={
+                  <ProtectedRoute>
+                    <Programs />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/colleges" 
+                element={
+                  <ProtectedRoute>
+                    <Colleges />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </div>
         </div>
-      </div>
+      )}
     </Router>
   );
 }

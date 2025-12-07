@@ -19,7 +19,7 @@ def create_app():
   static_folder = os.path.join(project_root, 'static')
   
   # Initialize Flask to serve static files from the React build folder
-  app = Flask(__name__, static_folder=static_folder, static_url_path='')
+  app = Flask(__name__, static_folder=static_folder)
   app.config.from_object(Config)
   
   # Initialize Database Teardown
@@ -64,7 +64,8 @@ def create_app():
     if path.startswith('api/'):
       return jsonify({'error': 'API endpoint not found'}), 404
 
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+    full_path = os.path.join(app.static_folder, path)
+    if path != "" and os.path.exists(full_path) and os.path.isfile(full_path):
       return send_from_directory(app.static_folder, path)
     else:
       # For all other paths, serve the React app's entry point.
