@@ -7,7 +7,7 @@ class Program:
     cur = conn.cursor()
 
     if only_codes:
-        cur.execute('SELECT program_code FROM program')
+        cur.execute('SELECT program_code FROM program ORDER BY program_code ASC')
         results = [row[0] for row in cur.fetchall()]
         cur.close()
         return {'data': results}
@@ -66,16 +66,18 @@ class Program:
       cur.close()
 
   @staticmethod
-  def update(code, name, college_code):
+  def update(old_code, new_code, name, college_code):
     conn = get_db()
     cur = conn.cursor()
     try:
-      cur.execute('UPDATE program SET program_name = %s, college_code = %s WHERE program_code = %s', (name, college_code, code))
+      cur.execute('UPDATE program SET program_code = %s, program_name = %s, college_code = %s WHERE program_code = %s', (new_code, name, college_code, old_code))
       conn.commit()
-      return cur.rowcount > 0
-    except Exception:
+      if cur.rowcount > 0:
+        return True, "Program updated successfully"
+      return False, "Program not found"
+    except Exception as e:
       conn.rollback()
-      return False
+      return False, str(e)
     finally:
       cur.close()
 
@@ -86,9 +88,11 @@ class Program:
     try:
       cur.execute('DELETE FROM program WHERE program_code = %s', (code,))
       conn.commit()
-      return cur.rowcount > 0
-    except Exception:
+      if cur.rowcount > 0:
+        return True, "Program deleted successfully"
+      return False, "Program not found"
+    except Exception as e:
       conn.rollback()
-      return False
+      return False, str(e)
     finally:
       cur.close()

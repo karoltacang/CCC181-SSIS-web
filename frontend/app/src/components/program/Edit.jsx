@@ -31,7 +31,7 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
     setLoading(true);
 
     try {
-      const response = await programsAPI.update(program.code, { program_name: formData.program_name, college_code: formData.college_code});
+      const response = await programsAPI.update(program.code, { program_code: formData.program_code, program_name: formData.program_name, college_code: formData.college_code});
       if (response.status === 200) {
       onSuccess();
       onClose();
@@ -59,13 +59,13 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
         <div className="edit-body">
           <form onSubmit={handleSubmit}>
             <div className="form-row">
-              <div className="form-group inactive">
+              <div className="form-group">
                 <label>Program Code</label>
                 <input
                   type="text"
                   name="program_code"
                   value={formData.program_code}
-                  disabled
+                  onChange={handleChange}
                 />
               </div>
               <div className="form-group">
@@ -78,7 +78,7 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
                 >
                   <option value="">Select College</option>
                   {colleges.map((col) => (
-                    <option key={col.college_code} value={col.college_code}>{col.college_code}</option>
+                    <option key={col} value={col}>{col}</option>
                   ))}
                 </select>
               </div>

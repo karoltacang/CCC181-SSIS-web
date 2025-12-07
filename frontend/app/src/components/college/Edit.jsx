@@ -29,20 +29,20 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
     setLoading(true);
 
     try {
-      const response = await collegesAPI.update(college.code, { college_name: formData.college_name });
+      const response = await collegesAPI.update(college.code, { college_code: formData.college_code, college_name: formData.college_name });
       if (response.status === 200) {
-      onSuccess();
-      onClose();
-    } else {
-      setError('Failed to update college');
+        onSuccess();
+        onClose();
+      } else {
+        setError('Failed to update college');
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.error || err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.error || err.message || 'Something went wrong');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   if (!isOpen) return null;
 
@@ -56,13 +56,13 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
 
         <div className="edit-body">
           <form onSubmit={handleSubmit}>
-            <div className="form-group inactive">
+            <div className="form-group">
               <label>College Code</label>
               <input
                 type="text"
                 name="college_code"
                 value={formData.college_code}
-                disabled
+                onChange={handleChange}
               />
             </div>
 

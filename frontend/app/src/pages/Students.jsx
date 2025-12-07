@@ -93,7 +93,7 @@ export default function Students() {
     fetchStudents(search.trim(), false, key, direction);
   };
 
-  const fetchStudents = async (searchTerm = search.trim(), background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
+  const fetchStudents = async (searchTerm = "", background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
     try {
       if (!background) setLoading(true);
       
@@ -150,7 +150,7 @@ export default function Students() {
         id: student.student_id,
         firstname: student.first_name,
         lastname: student.last_name,
-        program: student.program_code,
+        program: student.program_code || 'None',
         year: student.year_level,
         gender: student.gender || 'N/A'
       }));
@@ -173,7 +173,7 @@ export default function Students() {
   const handleEditSuccess = () => {
     setEditItem(null);
     clearStudentCache();
-    fetchStudents(undefined, true);
+    fetchStudents(search.trim(), true);
   }
 
   const handleDelete = (item) => {
@@ -185,7 +185,7 @@ export default function Students() {
       await studentsAPI.delete(deleteItem.id);
       clearStudentCache();
       setDeleteItem(null);
-      fetchStudents(undefined, true);
+      fetchStudents(search.trim(), true);
     } catch (err) {
       console.error("Error deleting student:", err);
       setError("Failed to delete student");
@@ -314,7 +314,7 @@ export default function Students() {
         <AddStudentModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={() => { clearStudentCache(); fetchStudents(undefined, true); }}
+          onSuccess={() => { clearStudentCache(); fetchStudents(search.trim(), true); }}
           programs={programsList}
         />
       )}
@@ -324,7 +324,7 @@ export default function Students() {
           isOpen={uploadModalOpen}
           student={uploadItem}
           onClose={() => setUploadModalOpen(false)}
-          onSuccess={() => { clearStudentCache(); fetchStudents(undefined, true); }}
+          onSuccess={() => { clearStudentCache(); fetchStudents(search.trim(), true); }}
         />
       )}
     </>

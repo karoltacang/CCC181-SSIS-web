@@ -7,7 +7,7 @@ class College:
     cur = conn.cursor()
 
     if only_codes:
-        cur.execute('SELECT college_code FROM college')
+        cur.execute('SELECT college_code FROM college ORDER BY college_code ASC')
         results = [row[0] for row in cur.fetchall()]
         cur.close()
         return {'data': results}
@@ -67,16 +67,18 @@ class College:
       cur.close()
 
   @staticmethod
-  def update(code, name):
+  def update(old_code, new_code, name):
     conn = get_db()
     cur = conn.cursor()
     try:
-      cur.execute('UPDATE college SET college_name = %s WHERE college_code = %s', (name, code))
+      cur.execute('UPDATE college SET college_code = %s, college_name = %s WHERE college_code = %s', (new_code, name, old_code))
       conn.commit()
-      return cur.rowcount > 0
-    except Exception:
+      if cur.rowcount > 0:
+        return True, "College updated successfully"
+      return False, "College not found"
+    except Exception as e:
       conn.rollback()
-      return False
+      return False, str(e)
     finally:
       cur.close()
 

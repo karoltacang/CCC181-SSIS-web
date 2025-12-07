@@ -139,7 +139,7 @@ function AddStudentModal({ isOpen, onClose, onSuccess, programs }) {
                 >
                   <option value="">Select Program</option>
                   {programs.map((prog) => (
-                    <option key={prog.program_code} value={prog.program_code}>{prog.program_code}</option>
+                    <option key={prog} value={prog}>{prog}</option>
                   ))}
                 </select>
                 <span className="field-error">{errors.program_code || '\u00A0'}</span>

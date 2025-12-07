@@ -15,7 +15,7 @@ oauth = OAuth()
 def create_app():
   scheduler = APScheduler()
   # Define the static folder for the React production build
-  project_root = os.path.dirname(os.path.dirname(__file__))
+  project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   static_folder = os.path.join(project_root, 'static')
   
   # Initialize Flask to serve static files from the React build folder
@@ -61,12 +61,16 @@ def create_app():
   @app.route('/', defaults={'path': ''}, methods=['GET'])
   @app.route('/<path:path>', methods=['GET'])
   def serve_react(path):    
-    # If it's an API call that doesn't exist, it will be handled correctly as a 404.
+    if path.startswith('api/'):
+      return jsonify({'error': 'API endpoint not found'}), 404
+
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
       return send_from_directory(app.static_folder, path)
     else:
       # For all other paths, serve the React app's entry point.
-      return send_from_directory(app.static_folder, 'index.html')
+      if os.path.exists(os.path.join(app.static_folder, 'index.html')):
+        return send_from_directory(app.static_folder, 'index.html')
+      return jsonify({'error': 'React build not found. Please run npm run build'}), 404
   
   @app.cli.command('cleanup-tokens')
   def cleanup_tokens():

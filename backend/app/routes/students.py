@@ -4,7 +4,7 @@ from app.models.student import Student
 
 students_bp = Blueprint('students', __name__)
 
-@students_bp.route('', methods=['GET'])
+@students_bp.route('', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def get_students():
   """Get all students with pagination, optionally filtered by program_code or a search query."""
@@ -33,24 +33,30 @@ def get_students():
   except Exception as e:
     return jsonify({'error': str(e)}), 500
 
-@students_bp.route('', methods=['POST'])
+@students_bp.route('', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def create_student():
   """Create a new student."""
   try:
     data = request.get_json()
     
-    required_fields = ['student_id', 'first_name', 'last_name', 'program_code', 'year_level']
-    if not data or not all(field in data for field in required_fields):
+    student_id = data.get('student_id') or data.get('id')
+    first_name = data.get('first_name') or data.get('firstname')
+    last_name = data.get('last_name') or data.get('lastname')
+    program_code = data.get('program_code') or data.get('program')
+    year_level = data.get('year_level') or data.get('year')
+    gender = data.get('gender')
+
+    if not data or not all([student_id, first_name, last_name, program_code, year_level]):
       return jsonify({'error': 'student_id, first_name, last_name, program_code, and year_level are required'}), 400
     
     if Student.create(
-      student_id=data['student_id'],
-      first_name=data['first_name'],
-      last_name=data['last_name'],
-      year_level=data['year_level'],
-      gender=data.get('gender'),
-      program_code=data['program_code']
+      student_id=student_id,
+      first_name=first_name,
+      last_name=last_name,
+      year_level=year_level,
+      gender=gender,
+      program_code=program_code
     ):
       return jsonify(data), 201
     return jsonify({'error': 'Failed to create student'}), 400
@@ -78,13 +84,21 @@ def update_student(id):
     if not data:
       return jsonify({'error': 'Request body is empty'}), 400
 
+    first_name = data.get('first_name') or data.get('firstname')
+    last_name = data.get('last_name') or data.get('lastname')
+    year_level = data.get('year_level') or data.get('year')
+    gender = data.get('gender')
+    program_code = data.get('program_code') or data.get('program')
+    new_id = data.get('student_id') or data.get('id') or id
+
     if Student.update(
-      student_id=id,
-      first_name=data.get('first_name'),
-      last_name=data.get('last_name'),
-      year_level=data.get('year_level'),
-      gender=data.get('gender'),
-      program_code=data.get('program_code'),
+      old_id=id,
+      new_id=new_id,
+      first_name=first_name,
+      last_name=last_name,
+      year_level=year_level,
+      gender=gender,
+      program_code=program_code,
     ):
       updated_student = Student.get_by_id(id)
       return jsonify(updated_student), 200

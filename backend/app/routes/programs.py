@@ -4,14 +4,14 @@ from app.models.program import Program
 
 programs_bp = Blueprint('programs', __name__)
 
-@programs_bp.route('', methods=['GET'])
+@programs_bp.route('', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def get_programs():
     try:
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
         search = request.args.get('search')
-        only_codes = request.args.get('only_codes') == 'true'
+        only_codes = request.args.get('only_codes', '').lower() == 'true'
         sort_by = request.args.get('sort_by', 'program_code')
         order = request.args.get('order', 'asc')
         
@@ -20,14 +20,18 @@ def get_programs():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@programs_bp.route('', methods=['POST'])
+@programs_bp.route('', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def create_program():
     data = request.json
-    if not data or 'code' not in data or 'name' not in data or 'college' not in data:
+    code = data.get('code') or data.get('program_code')
+    name = data.get('name') or data.get('program_name')
+    college = data.get('college') or data.get('college_code')
+
+    if not data or not code or not name or not college:
         return jsonify({'error': 'Missing required fields'}), 400
     
-    if Program.create(data['code'], data['name'], data['college']):
+    if Program.create(code, name, college):
         return jsonify({'message': 'Program created'}), 201
     return jsonify({'error': 'Failed to create program'}), 400
 
@@ -35,13 +39,19 @@ def create_program():
 @jwt_required()
 def update_program(code):
     data = request.json
-    if Program.update(code, data.get('name'), data.get('college')):
-        return jsonify({'message': 'Program updated'}), 200
-    return jsonify({'error': 'Failed to update program'}), 404
+    name = data.get('name') or data.get('program_name')
+    college = data.get('college') or data.get('college_code')
+    new_code = data.get('code') or data.get('program_code') or code
+
+    success, message = Program.update(code, new_code, name, college)
+    if success:
+        return jsonify({'message': message}), 200
+    return jsonify({'error': message}), 400
 
 @programs_bp.route('/<code>', methods=['DELETE'])
 @jwt_required()
 def delete_program(code):
-    if Program.delete(code):
-        return jsonify({'message': 'Program deleted'}), 200
-    return jsonify({'error': 'Failed to delete program'}), 404
+    success, message = Program.delete(code)
+    if success:
+        return jsonify({'message': message}), 200
+    return jsonify({'error': message}), 400

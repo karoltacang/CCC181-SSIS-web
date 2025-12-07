@@ -67,7 +67,7 @@ export default function Colleges() {
     fetchColleges(search.trim(), false, key, direction);
   };
 
-  const fetchColleges = async (searchTerm = search.trim(), background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
+  const fetchColleges = async (searchTerm = "", background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
     try {
       if (!background) setLoading(true);
       
@@ -123,7 +123,7 @@ export default function Colleges() {
   const handleEditSuccess = () => {
     setEditItem(null);
     clearCollegeCache();
-    fetchColleges(undefined, true);
+    fetchColleges(search.trim(), true);
   };
 
   const handleDelete = (item) => {
@@ -135,7 +135,7 @@ export default function Colleges() {
       await collegesAPI.delete(deleteItem.code);
       clearCollegeCache();
       setDeleteItem(null);
-      fetchColleges(undefined, true);
+      fetchColleges(search.trim(), true);
     } catch (err) {
       console.error("Error deleting college:", err);
       setError("Failed to delete college");
@@ -258,7 +258,7 @@ export default function Colleges() {
         <AddCollegeModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={() => { clearCollegeCache(); fetchColleges(undefined, true); }}
+          onSuccess={() => { clearCollegeCache(); fetchColleges(search.trim(), true); }}
         />
       )}
     </>

@@ -90,7 +90,7 @@ function AddProgramModal({ isOpen, onClose, onSuccess, colleges }) {
                 >
                   <option value="">Select College</option>
                   {colleges.map((col) => (
-                    <option key={col.college_code} value={col.college_code}>{col.college_code}</option>
+                    <option key={col} value={col}>{col}</option>
                   ))}
                 </select>
                 <span className="field-error">{errors.college_code || '\u00A0'}</span>

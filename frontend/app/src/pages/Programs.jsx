@@ -49,7 +49,7 @@ export default function Programs() {
         return;
       }
       try {
-        const response = await collegesAPI.getAll({ per_page: 1000, only_codes: true });
+        const response = await collegesAPI.getAll({ only_codes: true });
         const data = response.data.data || [];
         setCollegesList(data);
         sessionStorage.setItem('colleges_list', JSON.stringify(data));
@@ -88,7 +88,7 @@ export default function Programs() {
     fetchPrograms(search.trim(), false, key, direction);
   };
 
-  const fetchPrograms = async (searchTerm = search.trim(), background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
+  const fetchPrograms = async (searchTerm = "", background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
     try {
       if (!background) setLoading(true);
       
@@ -124,7 +124,7 @@ export default function Programs() {
       const formattedData = data.map(program => ({
         code: program.program_code,
         name: program.program_name,
-        college: program.college_code
+        college: program.college_code || 'None'
       }));
 
       setProgramData(formattedData);
@@ -145,7 +145,7 @@ export default function Programs() {
   const handleEditSuccess = () => {
     setEditItem(null);
     clearProgramCache();
-    fetchPrograms(undefined, true);
+    fetchPrograms(search.trim(), true);
   };
 
   const handleDelete = (item) => {
@@ -157,7 +157,7 @@ export default function Programs() {
       await programsAPI.delete(deleteItem.code);
       clearProgramCache();
       setDeleteItem(null);
-      fetchPrograms(undefined, true);
+      fetchPrograms(search.trim(), true);
     } catch (err) {
       console.error("Error deleting program:", err);
       setError("Failed to delete program");
@@ -281,7 +281,7 @@ export default function Programs() {
         <AddProgramModal
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
-          onSuccess={() => { clearProgramCache(); fetchPrograms(undefined, true); }}
+          onSuccess={() => { clearProgramCache(); fetchPrograms(search.trim(), true);; }}
           colleges={collegesList}
         />
       )}

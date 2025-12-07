@@ -37,12 +37,12 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
     setLoading(true);
 
     try {
-      const response = await studentsAPI.update(student.id, { first_name: formData.first_name, last_name: formData.last_name, program_code: formData.program_code, year_level: formData.year_level, gender: formData.gender});
+      const response = await studentsAPI.update(student.id, { student_id: formData.student_id, first_name: formData.first_name, last_name: formData.last_name, program_code: formData.program_code, year_level: formData.year_level, gender: formData.gender});
       if (response.status === 200) {
       onSuccess();
       onClose();
     } else {
-      setError('Failed to update program');
+      setError('Failed to update student');
     }
   } catch (err) {
     console.error(err);
@@ -65,13 +65,13 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
         <div className="edit-body">
           <form onSubmit={handleSubmit}>
             <div className="form-row">
-              <div className="form-group inactive">
+              <div className="form-group">
                 <label>Student ID</label>
                 <input
                   type="text"
                   name="student_id"
                   value={formData.student_id}
-                  disabled
+                  onChange={handleChange}
                 />
               </div>
               <div className="form-group">
@@ -125,7 +125,7 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
                 >
                   <option value="">Select Program</option>
                   {programs.map((prog) => (
-                    <option key={prog.program_code} value={prog.program_code}>{prog.program_code}</option>
+                    <option key={prog} value={prog}>{prog}</option>
                   ))}
                 </select>
               </div>

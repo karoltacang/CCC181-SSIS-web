@@ -121,15 +121,15 @@ class Student:
       cur.close()
   
   @staticmethod
-  def update(student_id, first_name, last_name, year_level, gender, program_code):
+  def update(old_id, new_id, first_name, last_name, year_level, gender, program_code):
     conn = get_db()
     cur = conn.cursor()
     try:
       cur.execute(
         '''UPDATE student
-                  SET first_name = %s, last_name = %s, year_level = %s, gender = %s, program_code = %s
+                  SET student_id = %s, first_name = %s, last_name = %s, year_level = %s, gender = %s, program_code = %s
                   WHERE student_id = %s''',
-        (first_name, last_name, year_level, gender, program_code, student_id)
+        (new_id, first_name, last_name, year_level, gender, program_code, old_id)
       )
       affected = cur.rowcount
       conn.commit()
