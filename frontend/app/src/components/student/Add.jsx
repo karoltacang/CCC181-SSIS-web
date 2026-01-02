@@ -24,7 +24,11 @@ function AddStudentModal({ isOpen, onClose, onSuccess, programs }) {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.student_id.trim()) newErrors.student_id = 'Student ID is required';
+    if (!formData.student_id.trim()) {
+      newErrors.student_id = 'Student ID is required';
+    } else if (!/^\d{4}-\d{4}$/.test(formData.student_id)) {
+      newErrors.student_id = 'Student ID must be format 0000-0000';
+    }
     if (!formData.year_level) newErrors.year_level = 'Year Level is required';
     if (!formData.first_name.trim()) newErrors.first_name = 'First Name is required';
     if (!formData.last_name.trim()) newErrors.last_name = 'Last Name is required';

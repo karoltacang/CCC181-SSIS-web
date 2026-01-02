@@ -12,7 +12,9 @@ def get_students():
     # Pagination params
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 10))
-    program_code = request.args.get('program_code')
+    program_code = request.args.getlist('program_code[]') or request.args.getlist('program_code')
+    year_level = request.args.getlist('year_level[]') or request.args.getlist('year_level')
+    gender = request.args.getlist('gender[]') or request.args.getlist('gender')
     search = request.args.get('search')
     sort_by = request.args.get('sort_by', 'student_id')
     order = request.args.get('order', 'asc')
@@ -24,6 +26,8 @@ def get_students():
         per_page=per_page,
         search_term=search,
         program_code=program_code,
+        year_level=year_level,
+        gender=gender,
         sort_by=sort_by,
         order=order,
         only_codes=only_codes

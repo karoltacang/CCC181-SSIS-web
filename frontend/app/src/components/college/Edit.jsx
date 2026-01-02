@@ -8,6 +8,7 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
     college_name: ''
   });
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -21,10 +22,23 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.college_code.trim()) newErrors.college_code = 'College Code is required';
+    if (!formData.college_name.trim()) newErrors.college_name = 'College Name is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setError('');
     setLoading(true);
 
@@ -38,7 +52,12 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
       }
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || err.message || 'Something went wrong');
+      const errorMessage = err.response?.data?.error || err.message || 'Something went wrong';
+      if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('unique')) {
+        setError('College Code already exists.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -55,15 +74,17 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
         </div>
 
         <div className="edit-body">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="form-group">
               <label>College Code</label>
               <input
                 type="text"
                 name="college_code"
+                className={errors.college_code ? 'input-error' : ''}
                 value={formData.college_code}
                 onChange={handleChange}
               />
+              <span className="field-error">{errors.college_code || '\u00A0'}</span>
             </div>
 
             <div className="form-group">
@@ -71,10 +92,12 @@ function EditCollegeModal({ isOpen, onClose, college, onSuccess }) {
               <input
                 type="text"
                 name="college_name"
+                className={errors.college_name ? 'input-error' : ''}
                 value={formData.college_name}
                 onChange={handleChange}
                 required
               />
+              <span className="field-error">{errors.college_name || '\u00A0'}</span>
             </div>
 
             {error && <div className="error-message">{error}</div>}

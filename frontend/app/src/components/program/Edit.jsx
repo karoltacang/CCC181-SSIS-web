@@ -9,6 +9,7 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
     college_code: ''
   });
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -23,28 +24,47 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.program_code.trim()) newErrors.program_code = 'Program Code is required';
+    if (!formData.college_code) newErrors.college_code = 'College is required';
+    if (!formData.program_name.trim()) newErrors.program_name = 'Program Name is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setError('');
     setLoading(true);
 
     try {
       const response = await programsAPI.update(program.code, { program_code: formData.program_code, program_name: formData.program_name, college_code: formData.college_code});
       if (response.status === 200) {
-      onSuccess();
-      onClose();
-    } else {
-      setError('Failed to update program');
+        onSuccess();
+        onClose();
+      } else {
+        setError('Failed to update program');
+      }
+    } catch (err) {
+      console.error(err);
+      const errorMessage = err.response?.data?.error || err.message || 'Something went wrong';
+      if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('unique')) {
+        setError('Program Code already exists.');
+      } else {
+        setError(errorMessage);
+      }
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.error || err.message || 'Something went wrong');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   if (!isOpen) return null;
 
@@ -57,21 +77,24 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
         </div>
 
         <div className="edit-body">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="form-row">
               <div className="form-group">
                 <label>Program Code</label>
                 <input
                   type="text"
                   name="program_code"
+                  className={errors.program_code ? 'input-error' : ''}
                   value={formData.program_code}
                   onChange={handleChange}
                 />
+                <span className="field-error">{errors.program_code || '\u00A0'}</span>
               </div>
               <div className="form-group">
                 <label>College Code *</label>
                 <select
                   name="college_code"
+                  className={errors.college_code ? 'input-error' : ''}
                   value={formData.college_code}
                   onChange={handleChange}
                   required
@@ -81,6 +104,7 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
                     <option key={col} value={col}>{col}</option>
                   ))}
                 </select>
+                <span className="field-error">{errors.college_code || '\u00A0'}</span>
               </div>
             </div>
 
@@ -89,10 +113,12 @@ function EditProgramModal({ isOpen, onClose, program, onSuccess, colleges }) {
               <input
                 type="text"
                 name="program_name"
+                className={errors.program_name ? 'input-error' : ''}
                 value={formData.program_name}
                 onChange={handleChange}
                 required
               />
+              <span className="field-error">{errors.program_name || '\u00A0'}</span>
             </div>
 
             {error && <div className="error-message">{error}</div>}

@@ -3,6 +3,7 @@ import { studentsAPI, programsAPI } from "../services/api";
 import EditStudentModal from "../components/student/Edit";
 import AddStudentModal from "../components/student/Add";
 import UploadPhotoModal from "../components/student/UploadPhoto";
+import FilterStudentModal from "../components/student/Filter";
 import DeleteModal from "../components/global/Delete";
 import Table from "../components/global/Table";
 import "../App.css";
@@ -31,8 +32,12 @@ export default function Students() {
   const [programsList, setProgramsList] = useState([]);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [uploadItem, setUploadItem] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
+  const [filterProgram, setFilterProgram] = useState([]);
+  const [filterYear, setFilterYear] = useState([]);
+  const [filterGender, setFilterGender] = useState([]);
 
   const clearStudentCache = () => {
     Object.keys(sessionStorage).forEach(key => {
@@ -71,7 +76,7 @@ export default function Students() {
 
   const handleSearchSubmit = () => {
     setCurrentPage(1);
-    fetchStudents(search.trim());
+    applyFilters();
   };
 
   const handlePageChange = (page) => {
@@ -93,7 +98,33 @@ export default function Students() {
     fetchStudents(search.trim(), false, key, direction);
   };
 
-  const fetchStudents = async (searchTerm = "", background = false, sortBy = sortConfig.key, order = sortConfig.direction) => {
+  const handleFilterChange = (setter) => (e) => {
+    setter(e.target.value);
+  };
+
+  const handleReset = () => {
+    setFilterProgram([]);
+    setFilterYear([]);
+    setFilterGender([]);
+    setSearch("");
+    setCurrentPage(1);
+    fetchStudents("", false, sortConfig.key, sortConfig.direction, { program: [], year: [], gender: [] });
+  };
+
+  const handleFilterApply = (newFilters) => {
+    setFilterProgram(newFilters.program);
+    setFilterYear(newFilters.year);
+    setFilterGender(newFilters.gender);
+    setCurrentPage(1);
+    fetchStudents(search.trim(), false, sortConfig.key, sortConfig.direction, newFilters);
+  };
+
+  const applyFilters = () => {
+    setCurrentPage(1);
+    fetchStudents(search.trim());
+  };
+
+  const fetchStudents = async (searchTerm = search, background = false, sortBy = sortConfig.key, order = sortConfig.direction, filters = {}) => {
     try {
       if (!background) setLoading(true);
       
@@ -106,8 +137,12 @@ export default function Students() {
       'gender': 'gender'
     };
     const backendSortBy = keyMap[sortBy] || sortBy;
+
+    const activeProgram = filters.program !== undefined ? filters.program : filterProgram;
+    const activeYear = filters.year !== undefined ? filters.year : filterYear;
+    const activeGender = filters.gender !== undefined ? filters.gender : filterGender;
       
-      const cacheKey = `students_${currentPage}_${perPage}_${searchTerm}_${backendSortBy}_${order}`;
+      const cacheKey = `students_${currentPage}_${perPage}_${searchTerm}_${backendSortBy}_${order}_${activeProgram}_${activeYear}_${activeGender}`;
       let data, total;
 
       const cached = sessionStorage.getItem(cacheKey);
@@ -124,6 +159,9 @@ export default function Students() {
         if (searchTerm) {
           params.search = searchTerm;
         }
+        if (activeProgram && activeProgram.length > 0) params.program_code = activeProgram;
+        if (activeYear && activeYear.length > 0) params.year_level = activeYear;
+        if (activeGender && activeGender.length > 0) params.gender = activeGender;
         params.sort_by = backendSortBy;
         params.order = order;
   
@@ -245,6 +283,13 @@ export default function Students() {
             <span className="results-info">{totalCount} Results</span>
           </div>
           <div className="right-side">
+            <button className="btn btn-secondary" onClick={() => setFilterModalOpen(true)}>
+              Filters {
+                ((Array.isArray(filterProgram) ? filterProgram.length > 0 : filterProgram) || 
+                (Array.isArray(filterYear) ? filterYear.length > 0 : filterYear) || 
+                (Array.isArray(filterGender) ? filterGender.length > 0 : filterGender)) ? '•' : ''
+              }
+            </button>
             <div className="action-buttons">
               <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>+ Add new student</button>
             </div>
@@ -325,6 +370,16 @@ export default function Students() {
           student={uploadItem}
           onClose={() => setUploadModalOpen(false)}
           onSuccess={() => { clearStudentCache(); fetchStudents(search.trim(), true); }}
+        />
+      )}
+
+      {filterModalOpen && (
+        <FilterStudentModal
+          isOpen={filterModalOpen}
+          onClose={() => setFilterModalOpen(false)}
+          onApply={handleFilterApply}
+          programs={programsList}
+          currentFilters={{ program: filterProgram, year: filterYear, gender: filterGender }}
         />
       )}
     </>

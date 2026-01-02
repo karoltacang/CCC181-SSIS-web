@@ -61,6 +61,9 @@ export const studentsAPI = {
   create: (data) => api.post('/students', data),
   update: (id, data) => api.put(`/students/${id}`, data),
   delete: (id) => api.delete(`/students/${id}`),
+  uploadPhoto: (id, formData) => api.post(`/students/${id}/photo`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 
 export default api;

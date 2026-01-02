@@ -12,6 +12,7 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
     gender: ''
   });
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,28 +30,54 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.student_id.trim()) {
+      newErrors.student_id = 'Student ID is required';
+    } else if (!/^\d{4}-\d{4}$/.test(formData.student_id)) {
+      newErrors.student_id = 'Student ID must be format 0000-0000';
+    }
+    if (!formData.year_level) newErrors.year_level = 'Year Level is required';
+    if (!formData.first_name.trim()) newErrors.first_name = 'First Name is required';
+    if (!formData.last_name.trim()) newErrors.last_name = 'Last Name is required';
+    if (!formData.program_code) newErrors.program_code = 'Program is required';
+    if (!formData.gender) newErrors.gender = 'Gender is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setError('');
     setLoading(true);
 
     try {
       const response = await studentsAPI.update(student.id, { student_id: formData.student_id, first_name: formData.first_name, last_name: formData.last_name, program_code: formData.program_code, year_level: formData.year_level, gender: formData.gender});
       if (response.status === 200) {
-      onSuccess();
-      onClose();
-    } else {
-      setError('Failed to update student');
+        onSuccess();
+        onClose();
+      } else {
+        setError('Failed to update student');
+      }
+    } catch (err) {
+      console.error(err);
+      const errorMessage = err.response?.data?.error || err.message || 'Something went wrong';
+      if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('unique')) {
+        setError('Student ID already exists.');
+      } else {
+        setError(errorMessage);
+      }
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(err);
-    setError(err.response?.data?.error || err.message || 'Something went wrong');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   if (!isOpen) return null;
 
@@ -63,22 +90,26 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
         </div>
 
         <div className="edit-body">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="form-row">
               <div className="form-group">
                 <label>Student ID</label>
                 <input
                   type="text"
                   name="student_id"
+                  className={errors.student_id ? 'input-error' : ''}
                   value={formData.student_id}
                   onChange={handleChange}
                 />
+                <span className="field-error">{errors.student_id || '\u00A0'}</span>
               </div>
+
               <div className="form-group">
                 <label>Year Level *</label>
                 <select
                   type="text"
                   name="year_level"
+                  className={errors.year_level ? 'input-error' : ''}
                   value={formData.year_level}
                   onChange={handleChange}
                   required
@@ -89,7 +120,9 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
                   <option value="3">3</option>
                   <option value="4">4</option>
                 </select>
+                <span className="field-error">{errors.year_level || '\u00A0'}</span>
               </div>
+
             </div>
 
             <div className="form-group">
@@ -97,10 +130,12 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
               <input
                 type="text"
                 name="first_name"
+                className={errors.first_name ? 'input-error' : ''}
                 value={formData.first_name}
                 onChange={handleChange}
                 required
               />
+              <span className="field-error">{errors.first_name || '\u00A0'}</span>
             </div>
 
             <div className="form-group">
@@ -108,10 +143,12 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
               <input
                 type="text"
                 name="last_name"
+                className={errors.last_name ? 'input-error' : ''}
                 value={formData.last_name}
                 onChange={handleChange}
                 required
               />
+              <span className="field-error">{errors.last_name || '\u00A0'}</span>
             </div>
 
             <div className="form-row">
@@ -119,6 +156,7 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
                 <label>Program *</label>
                 <select
                   name="program_code"
+                  className={errors.program_code ? 'input-error' : ''}
                   value={formData.program_code}
                   onChange={handleChange}
                   required
@@ -128,12 +166,15 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
                     <option key={prog} value={prog}>{prog}</option>
                   ))}
                 </select>
+                <span className="field-error">{errors.program_code || '\u00A0'}</span>
               </div>
+
               <div className="form-group">
                 <label>Gender *</label>
                 <select
                   type="text"
                   name="gender"
+                  className={errors.gender ? 'input-error' : ''}
                   value={formData.gender}
                   onChange={handleChange}
                   required
@@ -143,6 +184,7 @@ function EditStudentModal({ isOpen, onClose, student, onSuccess, programs }) {
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
+                <span className="field-error">{errors.gender || '\u00A0'}</span>
               </div>
             </div>
 

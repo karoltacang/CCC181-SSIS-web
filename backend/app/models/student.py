@@ -6,7 +6,7 @@ from supabase import create_client
 
 class Student:
   @staticmethod
-  def get_all(page=1, per_page=10, search_term=None, program_code=None, sort_by='student_id', order='asc', only_codes=False):
+  def get_all(page=1, per_page=10, search_term=None, program_code=None, year_level=None, gender=None, sort_by='student_id', order='asc', only_codes=False):
     conn = get_db()
     cur = conn.cursor()
 
@@ -36,8 +36,24 @@ class Student:
       params.extend([like_term] * 5)
     
     if program_code:
-      conditions.append('program_code = %s')
-      params.append(program_code)
+      if 'None' in program_code:
+        clean_codes = [p for p in program_code if p != 'None']
+        if clean_codes:
+          conditions.append('(program_code = ANY(%s) OR program_code IS NULL)')
+          params.append(clean_codes)
+        else:
+          conditions.append('program_code IS NULL')
+      else:
+        conditions.append('program_code = ANY(%s)')
+        params.append(program_code)
+
+    if year_level:
+      conditions.append('year_level::text = ANY(%s)')
+      params.append(year_level)
+
+    if gender:
+      conditions.append('gender = ANY(%s)')
+      params.append(gender)
 
     # WHERE clause (for filters)
     if conditions:
